@@ -8,9 +8,9 @@ const getHighlightColor = (oldPrice: bigint | undefined, newPrice: bigint | unde
 
   const change = Math.abs(Number(newPrice) - Number(oldPrice));
 
-  if (change < 3) return "bg-green-100 dark:bg-green-900";
-  if (change < 5) return "bg-yellow-100 dark:bg-yellow-900";
-  return "bg-red-100 dark:bg-red-900";
+  if (change < 3) return "bg-success";
+  if (change < 10) return "bg-warning";
+  return "bg-error";
 };
 
 export const PriceWidget = () => {

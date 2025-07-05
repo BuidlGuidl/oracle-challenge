@@ -2,8 +2,43 @@ import TooltipInfo from "../TooltipInfo";
 import { NodeRow } from "./NodeRow";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 
+const LoadingRow = () => {
+  return (
+    <tr>
+      <td className="animate-pulse">
+        <div className="h-8 bg-secondary rounded w-32"></div>
+      </td>
+      <td className="animate-pulse">
+        <div className="h-8 bg-secondary rounded w-20"></div>
+      </td>
+      <td className="animate-pulse">
+        <div className="h-8 bg-secondary rounded w-24"></div>
+      </td>
+      <td className="animate-pulse">
+        <div className="h-8 bg-secondary rounded w-20"></div>
+      </td>
+      <td className="animate-pulse">
+        <div className="h-8 bg-secondary rounded w-32"></div>
+      </td>
+      <td className="animate-pulse">
+        <div className="h-8 bg-secondary rounded w-32"></div>
+      </td>
+    </tr>
+  );
+};
+
+const NoNodesRow = () => {
+  return (
+    <tr>
+      <td colSpan={6} className="text-center">
+        No nodes found
+      </td>
+    </tr>
+  );
+};
+
 export const NodesTable = () => {
-  const { data: nodeAddresses } = useScaffoldReadContract({
+  const { data: nodeAddresses, isLoading } = useScaffoldReadContract({
     contractName: "StakeBasedOracle",
     functionName: "getNodeAddresses",
   });
@@ -26,7 +61,13 @@ export const NodesTable = () => {
               </tr>
             </thead>
             <tbody>
-              {nodeAddresses?.map((address: string, index: number) => <NodeRow key={index} address={address} />)}
+              {isLoading ? (
+                <LoadingRow />
+              ) : nodeAddresses?.length === 0 ? (
+                <NoNodesRow />
+              ) : (
+                nodeAddresses?.map((address: string, index: number) => <NodeRow key={index} address={address} />)
+              )}
             </tbody>
           </table>
         </div>
