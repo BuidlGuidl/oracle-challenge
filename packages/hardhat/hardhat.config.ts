@@ -25,8 +25,6 @@ const etherscanApiKey = process.env.ETHERSCAN_MAINNET_API_KEY || "DNXJA8RX2Q3VZ4
 const etherscanOptimisticApiKey = process.env.ETHERSCAN_OPTIMISTIC_API_KEY || "RM62RDISS1RH448ZY379NX625ASG1N633R";
 const basescanApiKey = process.env.BASESCAN_API_KEY || "ZZZEIPMT1MNJ8526VV2Y744CA7TNZR64G6";
 
-const autoMine = process.env.AUTO_MINE === "true";
-
 const config: HardhatUserConfig = {
   solidity: {
     compilers: [
@@ -54,7 +52,7 @@ const config: HardhatUserConfig = {
     // If the network you are looking for is not here you can add new network settings
     hardhat: {
       mining: {
-        auto: autoMine,
+        auto: true,
         mempool: {
           order: "fifo",
         },

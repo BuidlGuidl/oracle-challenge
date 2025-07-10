@@ -11,11 +11,13 @@ const runCycle = async (hre: HardhatRuntimeEnvironment) => {
     const blockNumber = await publicClient.getBlockNumber();
     console.log(`\n[Block ${blockNumber}] Starting new oracle cycle...`);
 
+    await publicClient.transport.request({ method: "evm_setAutomine", params: [false] });
     await reportPrices(hre);
     await publicClient.transport.request({ method: "evm_mine" });
 
     await validateNodes(hre);
     await publicClient.transport.request({ method: "evm_mine" });
+    await publicClient.transport.request({ method: "evm_setAutomine", params: [true] });
   } catch (error) {
     console.error("Error in oracle cycle:", error);
   }
@@ -23,7 +25,6 @@ const runCycle = async (hre: HardhatRuntimeEnvironment) => {
 
 const run = async () => {
   console.log("Starting oracle bot system...");
-
   while (true) {
     await runCycle(hre);
     await sleep(3000);

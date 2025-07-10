@@ -1,16 +1,18 @@
 import { PublicClient } from "viem";
 import { getRandomPrice } from "./price";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import oracleDeployment from "../../deployments/localhost/StakingOracle.json";
 import { getConfig } from "../utils";
 import { fetchPriceFromUniswap } from "../fetchPriceFromUniswap";
+import { DeployedContract } from "hardhat-deploy/types";
 
-const { abi, address } = oracleDeployment as { abi: any; address: `0x${string}` };
-
-const getStakedAmount = async (publicClient: PublicClient, nodeAddress: `0x${string}`) => {
+const getStakedAmount = async (
+  publicClient: PublicClient,
+  nodeAddress: `0x${string}`,
+  oracleContract: DeployedContract,
+) => {
   const nodeInfo = (await publicClient.readContract({
-    address,
-    abi,
+    address: oracleContract.address as `0x${string}`,
+    abi: oracleContract.abi,
     functionName: "nodes",
     args: [nodeAddress],
   })) as any[];
@@ -20,6 +22,8 @@ const getStakedAmount = async (publicClient: PublicClient, nodeAddress: `0x${str
 };
 
 export const reportPrices = async (hre: HardhatRuntimeEnvironment) => {
+  const { deployments } = hre;
+  const oracleContract = await deployments.get("StakeBasedOracle");
   const config = getConfig();
   const accounts = await hre.viem.getWalletClients();
   const oracleNodeAccounts = accounts.slice(1, 11);
@@ -27,11 +31,11 @@ export const reportPrices = async (hre: HardhatRuntimeEnvironment) => {
 
   // Get minimum stake requirement from contract
   const minimumStake = (await publicClient.readContract({
-    address,
-    abi,
+    address: oracleContract.address as `0x${string}`,
+    abi: oracleContract.abi,
     functionName: "MINIMUM_STAKE",
     args: [],
-  })) as bigint;
+  })) as unknown as bigint;
 
   const currentPrice = Number(await fetchPriceFromUniswap());
   try {
@@ -39,7 +43,7 @@ export const reportPrices = async (hre: HardhatRuntimeEnvironment) => {
       oracleNodeAccounts.map(async account => {
         const nodeConfig = config.NODE_CONFIGS[account.account.address] || config.NODE_CONFIGS.default;
         const shouldReport = Math.random() > nodeConfig.PROBABILITY_OF_SKIPPING_REPORT;
-        const stakedAmount = await getStakedAmount(publicClient, account.account.address);
+        const stakedAmount = await getStakedAmount(publicClient, account.account.address, oracleContract);
         if (stakedAmount < minimumStake) {
           console.log(`Insufficient stake for ${account.account.address} for price reporting`);
           return Promise.resolve();
@@ -49,8 +53,8 @@ export const reportPrices = async (hre: HardhatRuntimeEnvironment) => {
           const price = BigInt(await getRandomPrice(account.account.address, currentPrice));
           console.log(`Reporting price ${price} from ${account.account.address}`);
           return await account.writeContract({
-            address,
-            abi,
+            address: oracleContract.address as `0x${string}`,
+            abi: oracleContract.abi,
             functionName: "reportPrice",
             args: [price],
           });
