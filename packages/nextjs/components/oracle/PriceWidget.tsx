@@ -18,10 +18,15 @@ export const PriceWidget = () => {
   const [highlightColor, setHighlightColor] = useState("");
   const prevPrice = useRef<bigint | undefined>(undefined);
 
-  const { data: currentPrice } = useScaffoldReadContract({
+  const {
+    data: currentPrice,
+    isLoading,
+    isError,
+  } = useScaffoldReadContract({
     contractName: "StakingOracle",
     functionName: "getPrice",
-  }) as { data: bigint | undefined };
+    watch: true,
+  }) as { data: bigint | undefined; isError: boolean; isLoading: boolean };
 
   useEffect(() => {
     if (currentPrice !== undefined && prevPrice.current !== undefined && currentPrice !== prevPrice.current) {
@@ -39,15 +44,23 @@ export const PriceWidget = () => {
     <div className="flex flex-col gap-2">
       <h2 className="text-xl font-bold">Current Price</h2>
       <div className="bg-base-100 rounded-lg p-4 w-1/2 md:w-1/4 mx-auto flex justify-center items-center relative">
-        <TooltipInfo top={0} right={0} infoText="TODO: Update this tooltip" />
+        <TooltipInfo
+          top={0}
+          right={0}
+          infoText="Displays the median price. If an error occurs, it means that no oracle nodes have reported prices in the last 10 seconds."
+        />
         <div className={`rounded-lg transition-colors duration-1000 ${highlight ? highlightColor : ""}`}>
           <div className="text-4xl font-bold">
-            {currentPrice !== undefined ? (
+            {isError ? (
+              <div className="text-error">Error</div>
+            ) : currentPrice !== undefined ? (
               `$${parseFloat(formatEther(currentPrice)).toFixed(2)}`
-            ) : (
+            ) : isLoading || currentPrice === undefined ? (
               <div className="animate-pulse">
                 <div className="h-10 bg-secondary rounded-md w-32"></div>
               </div>
+            ) : (
+              <div className="text-error">Error</div>
             )}
           </div>
         </div>

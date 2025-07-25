@@ -37,6 +37,7 @@ contract StakingOracle {
     /* ========== Oracle Node Operation Functions ========== */
     function registerNode() public payable {
         require(msg.value >= MINIMUM_STAKE, "Insufficient stake");
+        require(nodes[msg.sender].nodeAddress == address(0), "Node already registered");
 
         nodes[msg.sender] = OracleNode({
             nodeAddress: msg.sender,
@@ -150,6 +151,7 @@ contract StakingOracle {
     function getPrice() public view returns (uint256) {
         (address[] memory validAddresses, ) = separateStaleNodes(nodeAddresses);
         uint256[] memory validPrices = getPricesFromAddresses(validAddresses);
+        require(validPrices.length > 0, "No valid prices available");
         Arrays.sort(validPrices);
         return getMedian(validPrices);
     }

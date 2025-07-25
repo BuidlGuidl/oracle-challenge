@@ -52,15 +52,26 @@ const deployWhitelistOracleContracts: DeployFunction = async function (hre: Hard
   const deployerAccount = accounts.find(a => a.account.address.toLowerCase() === deployer.toLowerCase());
   if (!deployerAccount) throw new Error("Deployer account not found in wallet clients");
 
-  for (let i = 0; i < simpleOracleAddresses.length; i++) {
-    const oracleAddress = simpleOracleAddresses[i] as `0x${string}`;
-    console.log(`Adding SimpleOracle ${i + 1}/10: ${oracleAddress}`);
-    await deployerAccount.writeContract({
-      address: whitelistOracleAddress,
-      abi: whitelistOracleAbi,
-      functionName: "addOracle",
-      args: [oracleAddress],
-    });
+  try {
+    for (let i = 0; i < simpleOracleAddresses.length; i++) {
+      const oracleAddress = simpleOracleAddresses[i] as `0x${string}`;
+      console.log(`Adding SimpleOracle ${i + 1}/10: ${oracleAddress}`);
+      await deployerAccount.writeContract({
+        address: whitelistOracleAddress,
+        abi: whitelistOracleAbi,
+        functionName: "addOracle",
+        args: [oracleAddress],
+      });
+    }
+  } catch (error: any) {
+    if (error.message?.includes("Oracle already exists")) {
+      console.error("\n❌ Deployment failed: Oracle contracts already exist!\n");
+      console.error("🔧 Please retry with:");
+      console.error("yarn deploy --reset\n");
+      process.exit(1);
+    } else {
+      throw error;
+    }
   }
 
   // Set initial prices for each SimpleOracle

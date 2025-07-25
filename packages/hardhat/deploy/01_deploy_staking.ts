@@ -34,17 +34,28 @@ const deployStakingOracle: DeployFunction = async function (hre: HardhatRuntimeE
   console.log("ORA Token deployed at:", oraTokenAddress);
   const initialPrice = await fetchPriceFromUniswap();
 
-  await Promise.all(
-    nodeAccounts.map(account => {
-      return account.writeContract({
-        address: stakingOracleAddress,
-        abi: deployment.abi,
-        functionName: "registerNode",
-        args: [],
-        value: parseEther("15"),
-      });
-    }),
-  );
+  try {
+    await Promise.all(
+      nodeAccounts.map(account => {
+        return account.writeContract({
+          address: stakingOracleAddress,
+          abi: deployment.abi,
+          functionName: "registerNode",
+          args: [],
+          value: parseEther("15"),
+        });
+      }),
+    );
+  } catch (error: any) {
+    if (error.message?.includes("Node already registered")) {
+      console.error("\n❌ Deployment failed: Nodes already registered!\n");
+      console.error("🔧 Please retry with:");
+      console.error("yarn deploy --reset\n");
+      process.exit(1);
+    } else {
+      throw error;
+    }
+  }
 
   await publicClient.transport.request({
     method: "evm_mine",

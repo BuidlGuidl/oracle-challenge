@@ -22,6 +22,9 @@ contract WhitelistOracle {
 
     function addOracle(address oracle) public onlyOwner {
         require(oracle != address(0), "Invalid oracle address");
+        for (uint256 i = 0; i < oracles.length; i++) {
+            require(address(oracles[i]) != oracle, "Oracle already exists");
+        }
         oracles.push(SimpleOracle(oracle));
         emit OracleAdded(oracle);
     }
