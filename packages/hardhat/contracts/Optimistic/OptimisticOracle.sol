@@ -153,7 +153,7 @@ contract OptimisticOracle {
 
     /**
      * @notice Claim reward for uncontested assertions after dispute window expires.
-     * @dev Only the proposer can claim if no dispute occurred.
+     * @dev The claim can be triggered by anyone, and the rewards are transferred to the proposer.
      */
     function claimUndisputedReward(uint256 assertionId) external {
         EventAssertion storage assertion = assertions[assertionId];
@@ -178,7 +178,7 @@ contract OptimisticOracle {
 
     /**
      * @notice Claim reward for disputed assertions after decider settlement.
-     * @dev Only the winner can claim after the decider has settled the dispute.
+     * @dev The claim can be triggered by anyone, and the rewards are transferred to the winner.
      */
     function claimDisputedReward(uint256 assertionId) external {
         EventAssertion storage assertion = assertions[assertionId];
@@ -204,8 +204,8 @@ contract OptimisticOracle {
     }
 
     /**
-     * @notice Claim refund for any assertion that does not get a proposal before deadline
-     * @dev Only the asserter can claim refund
+     * @notice Claim refund for any assertion that does not get a proposal before deadline.
+     * @dev The claim can be triggered by anyone, and the refunds are transferred to the asserter.
      */
     function claimRefund(uint256 assertionId) external {
         EventAssertion storage assertion = assertions[assertionId];
