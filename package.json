@@ -11,6 +11,7 @@
     "account": "yarn hardhat:account",
     "simulate:whitelist": "yarn workspace @se-2/hardhat simulate:whitelist",
     "simulate:staking": "yarn workspace @se-2/hardhat simulate:staking",
+    "simulate:optimistic": "yarn workspace @se-2/hardhat simulate:optimistic",
     "account:generate": "yarn workspace @se-2/hardhat account:generate",
     "account:import": "yarn workspace @se-2/hardhat account:import",
     "chain": "yarn hardhat:chain",

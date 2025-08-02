@@ -5,6 +5,7 @@ import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { useGlobalState } from "~~/services/store/store";
 
+// This component is used to monitor the block timestamp and trigger a transaction if the timestamp has not changed for 3 seconds
 export const MonitorAndTriggerTx = () => {
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
@@ -16,7 +17,7 @@ export const MonitorAndTriggerTx = () => {
   const prevTimestampRef = useRef<bigint | null>(null);
   const currentTimestampRef = useRef<bigint | null>(null);
 
-  const { setTimestamp } = useGlobalState();
+  const { setTimestamp, refetchAssertionStates } = useGlobalState();
 
   useEffect(() => {
     if (!publicClient || !walletClient) return;
@@ -45,6 +46,7 @@ export const MonitorAndTriggerTx = () => {
         // Update refs
         prevTimestampRef.current = current;
         currentTimestampRef.current = newTimestamp;
+        refetchAssertionStates();
 
         // Also update current timestamp in Zustand store for global access
         setTimestamp(newTimestamp);
@@ -57,7 +59,7 @@ export const MonitorAndTriggerTx = () => {
     pollBlock(); // Initial call
 
     return () => clearInterval(interval);
-  }, [publicClient, walletClient, isLocalNetwork, isBurnerWallet, setTimestamp]);
+  }, [publicClient, walletClient, isLocalNetwork, isBurnerWallet, setTimestamp, refetchAssertionStates]);
 
   return null;
 };

@@ -9,6 +9,7 @@
     "simpleBots": "hardhat run scripts/runWhitelistOracleBots.ts",
     "simulate:whitelist": "hardhat run scripts/runWhitelistOracleBots.ts",
     "simulate:staking": "hardhat run scripts/runOracleBots.ts",
+    "simulate:optimistic": "hardhat run scripts/runOptimisticBots.ts",
     "chain": "hardhat node --network hardhat --no-deploy",
     "check-types": "tsc --noEmit --incremental",
     "clean": "hardhat clean",
