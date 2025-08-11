@@ -63,13 +63,17 @@ export const WhitelistTable = () => {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex gap-2 justify-between">
-        <h2 className="text-xl font-bold">Oracle Nodes</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-bold">Oracle Nodes</h2>
+          <span className="text-sm text-gray-500">
+            <TooltipInfo infoText={tooltipText} />
+          </span>
+        </div>
         <div className="flex gap-2">
           <AddOracleButton />
         </div>
       </div>
       <div className="bg-base-100 rounded-lg p-4 relative">
-        <TooltipInfo top={0} right={0} infoText={tooltipText} />
         <div className="overflow-x-auto">
           <table className="table w-full">
             <thead>
