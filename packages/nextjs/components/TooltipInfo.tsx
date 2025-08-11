@@ -12,16 +12,16 @@ const TooltipInfo: React.FC<TooltipInfoProps> = ({ top, right, infoText }) => {
   if (top !== undefined && right !== undefined) {
     return (
       <span className="absolute z-10" style={{ top: `${top * 0.25}rem`, right: `${right * 0.25}rem` }}>
-        <div className="tooltip tooltip-secondary tooltip-right" data-tip={infoText}>
-          <QuestionMarkCircleIcon className="h-5 w-5" />
+        <div className="tooltip tooltip-secondary tooltip-right font-normal" data-tip={infoText}>
+          <QuestionMarkCircleIcon className="h-5 w-5 m-1" />
         </div>
       </span>
     );
   }
 
   return (
-    <div className="tooltip tooltip-secondary tooltip-right" data-tip={infoText}>
-      <QuestionMarkCircleIcon className="h-5 w-5" />
+    <div className="tooltip tooltip-secondary tooltip-right font-normal" data-tip={infoText}>
+      <QuestionMarkCircleIcon className="h-5 w-5 m-1" />
     </div>
   );
 };

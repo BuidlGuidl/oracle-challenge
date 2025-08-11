@@ -50,9 +50,9 @@ export const NodesTable = () => {
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
         <h2 className="text-xl font-bold">Oracle Nodes</h2>
-        <div className="mt-1">
+        <span>
           <TooltipInfo infoText={tooltipText} />
-        </div>
+        </span>
       </div>
       <div className="bg-base-100 rounded-lg p-4 relative">
         <div className="overflow-x-auto">
@@ -60,9 +60,24 @@ export const NodesTable = () => {
             <thead>
               <tr>
                 <th>Node Address</th>
-                <th>Staked Amount (ETH)</th>
-                <th>Last Reported Price (USD)</th>
-                <th>ORA Balance</th>
+                <th>
+                  <div className="flex items-center gap-1">
+                    Staked Amount (ETH)
+                    <TooltipInfo infoText="Red highlighting indicates a slashing event" />
+                  </div>
+                </th>
+                <th>
+                  <div className="flex items-center gap-1">
+                    Last Reported Price (USD)
+                    <TooltipInfo infoText="Color highlighting shows how close the reported price is to the median price across all nodes" />
+                  </div>
+                </th>
+                <th>
+                  <div className="flex items-center gap-1">
+                    ORA Balance
+                    <TooltipInfo infoText="Green highlighting indicates positive ORA token balance" />
+                  </div>
+                </th>
                 <th>Skip Probability</th>
                 <th>Price Variance</th>
               </tr>
