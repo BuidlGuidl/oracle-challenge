@@ -79,7 +79,12 @@ export const WhitelistTable = () => {
             <thead>
               <tr>
                 <th>Node Address</th>
-                <th>Last Reported Price (USD)</th>
+                <th>
+                  <div className="flex items-center gap-1">
+                    Last Reported Price (USD)
+                    <TooltipInfo infoText="Color shows proximity to median price" />
+                  </div>
+                </th>
                 <th>Last Reported Time</th>
               </tr>
             </thead>
