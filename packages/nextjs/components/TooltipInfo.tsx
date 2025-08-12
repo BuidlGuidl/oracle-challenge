@@ -5,17 +5,18 @@ interface TooltipInfoProps {
   top?: number;
   right?: number;
   infoText: string;
-  direction?: "left" | "right" | "top" | "bottom";
+  className?: string;
 }
 
 // Note: The relative positioning is required for the tooltip to work.
-const TooltipInfo: React.FC<TooltipInfoProps> = ({ top, right, infoText, direction = "right" }) => {
-  const tooltipDirectionClass = `tooltip-${direction}`;
+const TooltipInfo: React.FC<TooltipInfoProps> = ({ top, right, infoText, className = "" }) => {
+  const baseClasses = "tooltip tooltip-secondary font-normal";
+  const tooltipClasses = className ? `${baseClasses} ${className}` : `${baseClasses} tooltip-right`;
 
   if (top !== undefined && right !== undefined) {
     return (
       <span className="absolute z-10" style={{ top: `${top * 0.25}rem`, right: `${right * 0.25}rem` }}>
-        <div className={`tooltip tooltip-secondary ${tooltipDirectionClass} font-normal`} data-tip={infoText}>
+        <div className={tooltipClasses} data-tip={infoText}>
           <QuestionMarkCircleIcon className="h-5 w-5 m-1" />
         </div>
       </span>
@@ -23,7 +24,7 @@ const TooltipInfo: React.FC<TooltipInfoProps> = ({ top, right, infoText, directi
   }
 
   return (
-    <div className={`tooltip tooltip-secondary ${tooltipDirectionClass} font-normal`} data-tip={infoText}>
+    <div className={tooltipClasses} data-tip={infoText}>
       <QuestionMarkCircleIcon className="h-5 w-5 m-1" />
     </div>
   );

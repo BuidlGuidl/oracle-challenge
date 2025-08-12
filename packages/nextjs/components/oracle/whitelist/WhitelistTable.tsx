@@ -66,7 +66,7 @@ export const WhitelistTable = () => {
         <div className="flex items-center gap-2">
           <h2 className="text-xl font-bold">Oracle Nodes</h2>
           <span className="text-sm text-gray-500">
-            <TooltipInfo infoText={tooltipText} />
+            <TooltipInfo infoText={tooltipText} className="tooltip-right" />
           </span>
         </div>
         <div className="flex gap-2">

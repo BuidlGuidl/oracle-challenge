@@ -124,7 +124,7 @@ const SubmitAssertionModal = ({ isOpen, onClose }: SubmitAssertionModalProps) =>
             <TooltipInfo
               top={-2}
               right={5}
-              direction="left"
+              className="tooltip-left"
               infoText="Create a new assertion with your reward stake. Leave time inputs blank to use default values."
             />
           </div>
