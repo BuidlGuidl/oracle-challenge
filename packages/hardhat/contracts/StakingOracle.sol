@@ -129,7 +129,7 @@ contract StakingOracle {
 
     function separateStaleNodes(
         address[] memory nodesToSeparate
-    ) internal view returns (address[] memory fresh, address[] memory stale) {
+    ) public view returns (address[] memory fresh, address[] memory stale) {
         address[] memory freshNodeAddresses = new address[](nodesToSeparate.length);
         address[] memory staleNodeAddresses = new address[](nodesToSeparate.length);
         uint256 freshCount = 0;

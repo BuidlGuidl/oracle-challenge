@@ -1,6 +1,7 @@
 export interface NodeRowProps {
   address: string;
   index: number;
+  isStale?: boolean;
 }
 
 export interface WhitelistRowProps extends NodeRowProps {

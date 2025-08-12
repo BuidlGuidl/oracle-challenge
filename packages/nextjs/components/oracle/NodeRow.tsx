@@ -8,7 +8,7 @@ import { Address } from "~~/components/scaffold-eth";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 import { getHighlightColorForPrice } from "~~/utils/scaffold-eth/common";
 
-export const NodeRow = ({ address }: NodeRowProps) => {
+export const NodeRow = ({ address, isStale }: NodeRowProps) => {
   const { data = [] } = useScaffoldReadContract({
     contractName: "StakingOracle",
     functionName: "nodes",
@@ -87,6 +87,7 @@ export const NodeRow = ({ address }: NodeRowProps) => {
       <HighlightedCell
         value={lastReportedPriceFormatted}
         highlightColor={getHighlightColorForPrice(lastReportedPrice, medianPrice)}
+        className={isStale ? "opacity-40" : ""}
       >
         {lastReportedPriceFormatted}
       </HighlightedCell>
