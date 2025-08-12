@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+// import Image from "next/image";
 import Link from "next/link";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
@@ -30,13 +30,14 @@ const Home: NextPage = () => {
                 <span className="block text-4xl font-bold">Oracles</span>
               </h1>
               <div className="flex flex-col items-center justify-center">
-                <Image
+                <h1>TODO: Add hero image</h1>
+                {/* <Image
                   src="/hero.png"
                   width="727"
                   height="231"
                   alt="challenge banner"
                   className="rounded-xl border-4 border-primary"
-                />
+                /> */}
                 <div className="max-w-3xl">
                   <p className="text-center text-lg mt-8">
                     🔮 Build your own decentralized oracle network! In this challenge, you&apos;ll explore different
