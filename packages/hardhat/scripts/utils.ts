@@ -34,9 +34,13 @@ export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, 
 
 // Cleanup function to ensure automining is turned back on
 export async function cleanup() {
-  const publicClient = await hre.viem.getPublicClient();
-  await publicClient.transport.request({ method: "evm_setAutomine", params: [true] });
-  console.log("\nCleaning up: turning automining back on...");
+  try {
+    const publicClient = await hre.viem.getPublicClient();
+    await publicClient.transport.request({ method: "evm_setAutomine", params: [true] });
+    console.log("\nCleaning up: turning automining back on...");
+  } catch (error) {
+    console.error("Error cleaning up:", error);
+  }
 }
 
 export const QUESTIONS_FOR_OO: string[] = [
