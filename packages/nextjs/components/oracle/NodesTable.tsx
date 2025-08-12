@@ -43,8 +43,17 @@ export const NodesTable = () => {
     functionName: "getNodeAddresses",
   });
 
+  const { data: staleNodesData } = useScaffoldReadContract({
+    contractName: "StakingOracle",
+    functionName: "separateStaleNodes",
+    args: [nodeAddresses || []],
+  });
+
   const tooltipText =
     "This table displays registered oracle nodes that provide price data to the system. Nodes are displayed as inactive if they don't have enough ETH staked. You can edit the skip probability and price variance of an oracle node with the slider.";
+
+  // Extract stale node addresses from the returned data
+  const staleNodeAddresses = staleNodesData?.[1] || [];
 
   return (
     <div className="flex flex-col gap-2">
@@ -63,19 +72,19 @@ export const NodesTable = () => {
                 <th>
                   <div className="flex items-center gap-1">
                     Staked Amount (ETH)
-                    <TooltipInfo infoText="Red highlighting indicates a slashing event" />
+                    <TooltipInfo infoText="Red shows slashing event" />
                   </div>
                 </th>
                 <th>
                   <div className="flex items-center gap-1">
                     Last Reported Price (USD)
-                    <TooltipInfo infoText="Color highlighting shows how close the reported price is to the median price across all nodes" />
+                    <TooltipInfo infoText="Color shows proximity to median price" />
                   </div>
                 </th>
                 <th>
                   <div className="flex items-center gap-1">
                     ORA Balance
-                    <TooltipInfo infoText="Green highlighting indicates positive ORA token balance" />
+                    <TooltipInfo infoText="Green shows positive balance" />
                   </div>
                 </th>
                 <th>Skip Probability</th>
@@ -89,7 +98,7 @@ export const NodesTable = () => {
                 <NoNodesRow />
               ) : (
                 nodeAddresses?.map((address: string, index: number) => (
-                  <NodeRow key={index} index={index} address={address} />
+                  <NodeRow key={index} index={index} address={address} isStale={staleNodeAddresses.includes(address)} />
                 ))
               )}
             </tbody>
