@@ -6,10 +6,10 @@ import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 const getHighlightColor = (oldPrice: bigint | undefined, newPrice: bigint | undefined): string => {
   if (oldPrice === undefined || newPrice === undefined) return "";
 
-  const change = Math.abs(Number(newPrice) - Number(oldPrice));
+  const change = Math.abs(parseFloat(formatEther(newPrice)) - parseFloat(formatEther(oldPrice)));
 
-  if (change < 3) return "bg-success";
-  if (change < 10) return "bg-warning";
+  if (change < 50) return "bg-success";
+  if (change < 100) return "bg-warning";
   return "bg-error";
 };
 
