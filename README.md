@@ -280,7 +280,7 @@ WhitelistOracle → getPrice() → [100, 102, 98] → median(100) → 100
 
 </details>
 
-🧪 **Manual Testing**: Try manually changing the price of individual SimpleOracle contracts and adding new oracle nodes to see how the aggregated price changes:
+👊 **Manual Testing**: Try manually changing the price of individual SimpleOracle contracts and adding new oracle nodes to see how the aggregated price changes:
 
 1. **Change Prices**: Use the frontend to modify individual oracle prices
 
@@ -366,7 +366,7 @@ yarn simulate:whitelist
 - **Freshness Enforcement**: Stale data is automatically filtered out
 - **Use Cases**: Excellent for DeFi applications where economic alignment is crucial
 
-🧪 Run `yarn deploy --reset` then test the staking oracle. Try registering nodes, reporting prices, and slashing inactive nodes.
+🔄 Run `yarn deploy --reset` then test the staking oracle. Try registering nodes, reporting prices, and slashing inactive nodes.
 
 🧪 **Live Simulation**: Run the `yarn simulate:staking` command to watch a live simulation of staking oracle behavior with multiple nodes:
 
@@ -384,6 +384,7 @@ yarn simulate:staking
 - See how slashing mechanisms enforce data freshness
 - Observe the decentralized nature of the system
 - Recognize the trade-offs and risks associated with type of oracle
+
 ---
 
 ## Checkpoint 4: 🧠 Optimistic Oracle Architecture
@@ -424,7 +425,7 @@ sequenceDiagram
   end
 ```
 
-🧩 The way this system works is an someone creates an **assertion**;
+🧩 The way this system works is someone creates an **assertion**;
 - Something that needs a boolean answer (`true` or `false`)
 - After a certain time
 - Before a specific deadline
@@ -653,25 +654,25 @@ We need to allow the proposer to claim the reward when no dispute occurs before 
 <summary>🎯 Solution</summary>
 
 ```solidity
-function claimUndisputedReward(uint256 assertionId) external {
-    EventAssertion storage assertion = assertions[assertionId];
+    function claimUndisputedReward(uint256 assertionId) external {
+        EventAssertion storage assertion = assertions[assertionId];
 
-    if (assertion.proposer == address(0)) revert NotProposedAssertion();
-    if (assertion.disputer != address(0)) revert ProposalDisputed();
-    if (block.timestamp <= assertion.endTime) revert InvalidTime();
-    if (assertion.claimed) revert AlreadyClaimed();
+        if (assertion.proposer == address(0)) revert NotProposedAssertion();
+        if (assertion.disputer != address(0)) revert ProposalDisputed();
+        if (block.timestamp <= assertion.endTime) revert InvalidTime();
+        if (assertion.claimed) revert AlreadyClaimed();
 
-    assertion.claimed = true;
-    assertion.resolvedOutcome = assertion.proposedOutcome;
-    assertion.winner = assertion.proposer;
+        assertion.claimed = true;
+        assertion.resolvedOutcome = assertion.proposedOutcome;
+        assertion.winner = assertion.proposer;
 
-    uint256 totalReward = (assertion.reward + assertion.bond);
+        uint256 totalReward = (assertion.reward + assertion.bond);
 
-    (bool winnerSuccess, ) = payable(assertion.proposer).call{value: totalReward}("");
-    if (!winnerSuccess) revert TransferFailed();
+        (bool winnerSuccess, ) = payable(assertion.proposer).call{value: totalReward}("");
+        if (!winnerSuccess) revert TransferFailed();
 
-    emit RewardClaimed(assertionId, assertion.proposer, totalReward);
-}
+        emit RewardClaimed(assertionId, assertion.proposer, totalReward);
+    }
 ```
 
 </details>
@@ -710,26 +711,26 @@ Very similar to the last function except this one allows the winner of the dispu
 <summary>🎯 Solution</summary>
 
 ```solidity
-function claimDisputedReward(uint256 assertionId) external {
-    EventAssertion storage assertion = assertions[assertionId];
+    function claimDisputedReward(uint256 assertionId) external {
+        EventAssertion storage assertion = assertions[assertionId];
 
-    if (assertion.proposer == address(0)) revert NotProposedAssertion();
-    if (assertion.disputer == address(0)) revert NotDisputedAssertion();
-    if (assertion.winner == address(0)) revert AwaitingDecider();
-    if (assertion.claimed) revert AlreadyClaimed();
+        if (assertion.proposer == address(0)) revert NotProposedAssertion();
+        if (assertion.disputer == address(0)) revert NotDisputedAssertion();
+        if (assertion.winner == address(0)) revert AwaitingDecider();
+        if (assertion.claimed) revert AlreadyClaimed();
 
-    assertion.claimed = true;
+        assertion.claimed = true;
 
-    (bool deciderSuccess, ) = payable(decider).call{value: DECIDER_FEE}("");
-    if (!deciderSuccess) revert TransferFailed();
-    
-    uint256 totalReward = (assertion.reward + assertion.bond + assertion.bond) - DECIDER_FEE;
+        (bool deciderSuccess, ) = payable(decider).call{value: DECIDER_FEE}("");
+        if (!deciderSuccess) revert TransferFailed();
+        
+        uint256 totalReward = (assertion.reward + assertion.bond + assertion.bond) - DECIDER_FEE;
 
-    (bool winnerSuccess, ) = payable(assertion.winner).call{value: totalReward}("");
-    if (!winnerSuccess) revert TransferFailed();
+        (bool winnerSuccess, ) = payable(assertion.winner).call{value: totalReward}("");
+        if (!winnerSuccess) revert TransferFailed();
 
-    emit RewardClaimed(assertionId, assertion.winner, totalReward);
-}
+        emit RewardClaimed(assertionId, assertion.winner, totalReward);
+    }
 ```
 
 </details>
@@ -766,19 +767,19 @@ This function enables the asserter to get a refund of their posted reward when n
 <summary>🎯 Solution</summary>
 
 ```solidity
-function claimRefund(uint256 assertionId) external {
-    EventAssertion storage assertion = assertions[assertionId];
+    function claimRefund(uint256 assertionId) external {
+        EventAssertion storage assertion = assertions[assertionId];
 
-    if (assertion.proposer != address(0)) revert AssertionProposed();
-    if (block.timestamp <= assertion.endTime) revert InvalidTime();
-    if (assertion.claimed) revert AlreadyClaimed();
+        if (assertion.proposer != address(0)) revert AssertionProposed();
+        if (block.timestamp <= assertion.endTime) revert InvalidTime();
+        if (assertion.claimed) revert AlreadyClaimed();
 
-    assertion.claimed = true;
+        assertion.claimed = true;
 
-    (bool refundSuccess, ) = payable(assertion.asserter).call{value: assertion.reward}("");
-    if (!refundSuccess) revert TransferFailed();
-    emit RefundClaimed(assertionId, assertion.asserter, assertion.reward);
-}
+        (bool refundSuccess, ) = payable(assertion.asserter).call{value: assertion.reward}("");
+        if (!refundSuccess) revert TransferFailed();
+        emit RefundClaimed(assertionId, assertion.asserter, assertion.reward);
+    }
 ```
 
 </details>
@@ -817,21 +818,21 @@ Then set the winner to the proposer if the proposer was correct *or* set it to t
 <summary>🎯 Solution</summary>
 
 ```solidity
-function settleAssertion(uint256 assertionId, bool resolvedOutcome) external onlyDecider {
-    EventAssertion storage assertion = assertions[assertionId];
+    function settleAssertion(uint256 assertionId, bool resolvedOutcome) external onlyDecider {
+        EventAssertion storage assertion = assertions[assertionId];
 
-    if (assertion.proposer == address(0)) revert NotProposedAssertion();
-    if (assertion.disputer == address(0)) revert NotDisputedAssertion();
-    if (assertion.winner != address(0)) revert AlreadySettled();
+        if (assertion.proposer == address(0)) revert NotProposedAssertion();
+        if (assertion.disputer == address(0)) revert NotDisputedAssertion();
+        if (assertion.winner != address(0)) revert AlreadySettled();
 
-    assertion.resolvedOutcome = resolvedOutcome;
-    
-    assertion.winner = (resolvedOutcome == assertion.proposedOutcome)
-        ? assertion.proposer
-        : assertion.disputer;
+        assertion.resolvedOutcome = resolvedOutcome;
+        
+        assertion.winner = (resolvedOutcome == assertion.proposedOutcome)
+            ? assertion.proposer
+            : assertion.disputer;
 
-    emit AssertionSettled(assertionId, resolvedOutcome, assertion.winner);
-}
+        emit AssertionSettled(assertionId, resolvedOutcome, assertion.winner);
+    }
 ```
 
 </details>
@@ -915,18 +916,18 @@ The important thing here is that it reverts if it is not settled and if it has b
 <summary>🎯 Solution</summary>
 
 ```solidity
-function getResolution(uint256 assertionId) external view returns (bool) {
-    EventAssertion storage a = assertions[assertionId];
-    if (a.asserter == address(0)) revert AssertionNotFound();
+    function getResolution(uint256 assertionId) external view returns (bool) {
+        EventAssertion storage a = assertions[assertionId];
+        if (a.asserter == address(0)) revert AssertionNotFound();
 
-    if (a.disputer == address(0)) {
-        if (block.timestamp <= a.endTime) revert InvalidTime();
-        return a.proposedOutcome;
-    } else {
-        if (a.winner == address(0)) revert AwaitingDecider();
-        return a.resolvedOutcome;
+        if (a.disputer == address(0)) {
+            if (block.timestamp <= a.endTime) revert InvalidTime();
+            return a.proposedOutcome;
+        } else {
+            if (a.winner == address(0)) revert AwaitingDecider();
+            return a.resolvedOutcome;
+        }
     }
-}
 ```
 
 </details>
@@ -936,7 +937,7 @@ function getResolution(uint256 assertionId) external view returns (bool) {
 
 ✅ Make sure you have implemented everything correctly by running tests with `yarn test`. You can dig into any errors by viewing the tests at `packages/hardhat/test/OptimisticOracle.ts`.
 
-🧪 Run `yarn deploy --reset` then test the optimistic oracle. Try creating assertions, proposing outcomes, and disputing them.
+🔄 Run `yarn deploy --reset` then test the optimistic oracle. Try creating assertions, proposing outcomes, and disputing them.
 
 🧪 **Live Simulation**: Run the `yarn simulate:optimistic` command to see the full optimistic oracle lifecycle in action:
 
