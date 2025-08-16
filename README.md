@@ -248,7 +248,7 @@ WhitelistOracle → getPrice() → [100, 102, 98] → median(100) → 100
 
 ### 🤔 Critical Thinking: Security Vulnerabilities
 
-- *Question**: How could this whitelist oracle design be exploited or taken advantage of? What are the main attack vectors?
+- **Question**: How could this whitelist oracle design be exploited or taken advantage of? What are the main attack vectors?
 
 <details markdown='1'>
 
@@ -312,7 +312,7 @@ yarn simulate:whitelist
 
 🔍 Open the `packages/hardhat/contracts/01_Staking/StakingOracle.sol` file to examine the staking oracle implementation.
 
-**### 📖 Understanding the Code:**
+### 📖 Understanding the Code:
 
 🧩 The `StakingOracle` contract implements a decentralized economic incentive model:
 
@@ -358,7 +358,7 @@ yarn simulate:whitelist
 
 * ⛔️ Reverts if no valid prices are available
 
-**### 🤔 Key Insights:**
+### 🤔 Key Insights:
 
 - **Economic Incentives**: Nodes stake ETH and can be slashed for bad behavior, where in contrast, good behavior rewards the nodes with ORA token
 - **Decentralized**: Anyone can participate by staking, no central authority needed
@@ -378,7 +378,7 @@ yarn simulate:staking
 
 🤖 This will start automated bots that simulate honest and malicious node behavior, frequent and stale reports, and demonstrate how slashing and median aggregation impact the reported price. You can update the price variance and skip probability from the front-end as well.
 
-**### 🥅 Goals:**
+### 🥅 Goals:
 
 - Understand how economic incentives drive honest behavior
 - See how slashing mechanisms enforce data freshness
@@ -447,7 +447,7 @@ sequenceDiagram
 
 🔍 Open the `packages/hardhat/contracts/02_Optimistic/OptimisticOracle.sol` file to implement the optimistic oracle functionality.
 
-**### ✏️ Tasks:**
+### ✏️ Tasks:
 
 1. **Implement `assertEvent(string memory description, uint256 startTime, uint256 endTime)`**
 
@@ -478,7 +478,7 @@ Here are more granular instructions on setting up the EventAssertion struct:
 - reward should be `msg.value`
 - bond should be `FIXED_BOND`
 - startTime = `startTime`
-- endTime = `endTIme`
+- endTime = `endTime`
 - description = `description`
 - any remaining properties can be initialized with the default values (`false`, `address(0)`, etc.)
 
@@ -791,7 +791,7 @@ This function enables the asserter to get a refund of their posted reward when n
 
 This is the method that the decider will call to settle whether the proposer or disputer are correct.
 
-It should be;
+It should be:
 
 * 🧑‍⚖️ Only callable by the `decider` contract
 
@@ -949,7 +949,7 @@ yarn simulate:optimistic
 
 🤖 This will start automated bots that create assertions, propose outcomes, dispute proposals, and settle via the decider, so you can observe rewards, bonds, fees, and timing windows in a realistic flow.
 
-**### 🥅 Goals:**
+### 🥅 Goals:
 
 - Users can assert events with descriptions and time windows
 - Users can propose outcomes for asserted events
@@ -963,23 +963,16 @@ yarn simulate:optimistic
 
 🧠 Now let's analyze the strengths and weaknesses of each oracle design.
 
-**### 📊 Comparison Table:**
-
+### 📊 Comparison Table:
 | Aspect | Whitelist Oracle | Staking Oracle | Optimistic Oracle |
-
 |--------|------------------|----------------|-------------------|
-
 | **Speed** | Fast | Medium | Slow |
-
 | **Security** | Low (trusted authority) | Medium (economic incentives) | High (dispute resolution) |
-
 | **Decentralization** | Low | High | Medium |
-
 | **Cost** | Low | Medium | High |
-
 | **Complexity** | Simple | Medium | Complex |
 
-**### 🤔 Key Trade-offs:**
+### 🤔 Key Trade-offs:
 
 1. **Whitelist Oracle:**
 
@@ -1013,7 +1006,7 @@ yarn simulate:optimistic
 
 - ❌ More complex
 
-**### 🎯 Understanding the "Why":**
+### 🎯 Understanding the "Why":
 
 Each oracle design solves different problems:
 
@@ -1059,7 +1052,7 @@ Each oracle design solves different problems:
 
 > 🦊 Since we have deployed to a public testnet, you will now need to connect using a wallet you own or use a burner wallet. By default 🔥 `burner wallets` are only available on `hardhat` . You can enable them on every chain by setting `onlyLocalBurnerWallet: false` in your frontend config (`scaffold.config.ts` in `packages/nextjs/`)
 
-**#### Configuration of Third-Party Services for Production-Grade Apps.**
+#### Configuration of Third-Party Services for Production-Grade Apps.
 
 By default, 🏗 Scaffold-ETH 2 provides predefined API keys for popular services such as Alchemy and Etherscan. This allows you to begin developing and testing your applications more easily, avoiding the need to register for these services.
 
