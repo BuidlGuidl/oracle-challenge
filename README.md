@@ -38,7 +38,7 @@ Oracles are bridges between blockchains and the external world. They solve a fun
 - **Staking Oracle**: Decentralized with economic incentives, but more complex
 - **Optimistic Oracle**: Dispute-based with strong security guarantees, but higher latency
 
-📚 This challenge is inspired by real-world oracle systems like Chainlink, Pyth Network, and UMA Protocol. Each design pattern you'll implement has been battle-tested in production environments.
+📚 This challenge is inspired by real-world oracle systems like [Chainlink](https://chain.link/), [Pyth Network](https://www.pyth.network/), and [UMA Protocol](https://uma.xyz/). Each design pattern you'll implement has been battle-tested in production environments.
 
 💬 Meet other builders working on this challenge and get help in the [Oracle Challenge Telegram](https://t.me/+AkmcMB3jC3A0NDcx)
 
