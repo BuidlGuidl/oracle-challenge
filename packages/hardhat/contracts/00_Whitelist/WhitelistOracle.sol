@@ -16,7 +16,8 @@ contract WhitelistOracle {
     }
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "Not the owner");
+        // Intentionally removing the owner requirement to make it easy for you to impersonate the owner
+        // require(msg.sender == owner, "Not the owner");
         _;
     }
 
