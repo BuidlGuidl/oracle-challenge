@@ -46,7 +46,7 @@ Oracles are bridges between blockchains and the external world. They solve a fun
 
 ## Checkpoint 0: 📦 Environment 📚
 
-🛠️ Before you begin, you need to install the following tools:
+🛠️ Before you begin, make sure you have the following tools installed:
 
 - [Node (>=20.18.3)](https://nodejs.org/en/download/)
 - Yarn ([v1](https://classic.yarnpkg.com/en/docs/install/) or [v2+](https://yarnpkg.com/getting-started/install))
@@ -98,11 +98,11 @@ yarn start
 
 ## Checkpoint 1: 🏛️ Whitelist Oracle Overview
 
-🔍 Let's start the simplest of the three oracle designs we'll cover: the Whitelist Oracle. This design uses a centralized authority to control which data sources can provide information, making it simple and fast but requiring trust.
+🔍 Let's start with the simplest of the three oracle designs we'll cover: the Whitelist Oracle. This design uses a centralized authority to control which data sources can provide information, making it simple and fast but requiring trust.
 
 💰 The implementation we'll be looking at is a **price** oracle. Price oracles are one of the most common and critical types of oracles in DeFi, as they enable smart contracts to make decisions based on real-world asset prices. Our whitelist price oracle collects price reports from multiple trusted sources (instances of `SimpleOracle`) and returns their median value.
 
-🗂️ The whitelist oracle contracts are located in `packages/hardhat/contracts`. Go check them out and reference the following descriptions.
+🗂️ The whitelist oracle contracts are located in `packages/hardhat/contracts/00_Whitelist/`. Go check them out and reference the following descriptions.
 
 ### Core Components
 
@@ -110,7 +110,7 @@ yarn start
 
 - Basic oracle contract that allows price updates from the contract owner (We have commented out the onlyOwner modifier to allow you to impersonate the owner)
 
-- Each SimpleOracle represents one trusted data source
+- Each SimpleOracle instance represents one trusted data source
 
 2. 🏛️ **WhitelistOracle (`WhitelistOracle.sol`)**
 
@@ -140,15 +140,15 @@ yarn start
 
 1. **`setPrice(uint256 _newPrice)`** - This function allows the contract owner to update the current price
 
-* 🔄 Updates the `price` state variable with the new value
+   * 🔄 Updates the `price` state variable with the new value
 
-* ⏱️ Updates the `timestamp` to the current block timestamp
+   * ⏱️ Updates the `timestamp` to the current block timestamp
 
-* 📣 Emits the `PriceUpdated` event with the new price
+   * 📣 Emits the `PriceUpdated` event with the new price
 
 2. **`getPrice()`** - This function returns both the current price and timestamp
 
-* ↩️ Returns them as a tuple: `(price, timestamp)`
+   * ↩️ Returns them as a tuple: `(price, timestamp)`
 
 #### 🤔 Key Insights:
 
@@ -166,7 +166,7 @@ The `WhitelistOracle` contract **aggregates data from multiple SimpleOracle cont
 
 ```solidity
 
-SimpleOracle[] public oracles;  *// Array of SimpleOracle contracts*
+SimpleOracle[] public oracles;  // Array of SimpleOracle contract instances
 
 ```
 
@@ -179,33 +179,33 @@ SimpleOracle[] public oracles;  *// Array of SimpleOracle contracts*
 
 1. **`addOracle(address oracle)`** - Adds a SimpleOracle contract to the whitelist
 
-* ✔️ Validates the oracle address is not zero
+   * ✔️ Validates the oracle address is not zero
 
-* 🧪 Checks for duplicates in the existing list
+   * 🧪 Checks for duplicates in the existing list
 
-* ➕ Adds the SimpleOracle to the `oracles` array
+   * ➕ Adds the SimpleOracle to the `oracles` array
 
-* 📣 Emits the `OracleAdded` event
+   * 📣 Emits the `OracleAdded` event
 
 2. **`removeOracle(uint256 index)`** - Removes a SimpleOracle from the whitelist
 
-* ✔️ Validates the index is within bounds
+   * ✔️ Validates the index is within bounds
 
-* ➖ Efficiently removes the oracle (swaps with last element)
+   * ➖ Efficiently removes the oracle (swaps with last element)
 
-* 📣 Emits the `OracleRemoved` event
+   * 📣 Emits the `OracleRemoved` event
 
 3. **`getPrice()`** - Aggregates prices from all whitelisted SimpleOracle contracts
 
-* 🔁 Loops through each SimpleOracle in the whitelist
+   * 🔁 Loops through each SimpleOracle in the whitelist
 
-* 📡 Calls `getPrice()` on each SimpleOracle to get `(price, timestamp)`
+   * 📡 Calls `getPrice()` on each SimpleOracle to get `(price, timestamp)`
 
-* 🧹 Filters out stale prices (older than 10 seconds)
+   * 🧹 Filters out stale prices (older than 10 seconds)
 
-* 🧮 Calculates the median of valid prices
+   * ⛔️ Reverts if all prices are stale
 
-* ⛔️ Reverts if no valid prices are available
+   * 🧮 Calculates the median of valid prices
 
 #### 🤔 Key Insights:
 
@@ -254,29 +254,27 @@ WhitelistOracle → getPrice() → [100, 102, 98] → median(100) → 100
 
 <summary>💡 Click to see potential vulnerabilities</summary>
 
-- *Main Attack Vectors:**
+1. 🔓 **Whitelist Authority Compromise**: If the owner's private key is compromised, an attacker could:
 
-1. **Whitelist Authority Compromise**: If the owner's private key is compromised, an attacker could:
+   - Remove all legitimate oracles and add malicious ones
 
-- Remove all legitimate oracles and add malicious ones
+   - Manipulate which data sources are trusted
 
-- Manipulate which data sources are trusted
+   - Add multiple oracles they control to skew the median
 
-- Add multiple oracles they control to skew the median
+2. 👥 **Collusion Among Whitelisted Providers**: If enough whitelisted oracle providers collude, they could:
 
-2. **Collusion Among Whitelisted Providers**: If enough whitelisted oracle providers collude, they could:
+   - Report coordinated false prices to manipulate the median
 
-- Report coordinated false prices to manipulate the median
+   - Extract value from protocols relying on the oracle
 
-- Extract value from protocols relying on the oracle
+3. 🔓 **Data Provider Compromise**: Individual SimpleOracle operators could:
 
-3. **Data Provider Compromise**: Individual SimpleOracle operators could:
+   - Be hacked or coerced to report false prices
 
-- Be hacked or coerced to report false prices
+   - Sell their influence to manipulators
 
-- Sell their influence to manipulators
-
-- *Real-World Impact**: These vulnerabilities explain why protocols like [MakerDAO/Sky](https://github.com/sky-ecosystem/medianizer) eventually moved to more decentralized oracle systems as the stakes grew higher!
+💡 *Real-World Impact*: These vulnerabilities explain why protocols like [MakerDAO/Sky](https://github.com/sky-ecosystem/medianizer) eventually moved to more decentralized oracle systems as the stakes grew higher!
 
 </details>
 
@@ -312,53 +310,79 @@ yarn simulate:whitelist
 
 🔍 Open the `packages/hardhat/contracts/01_Staking/StakingOracle.sol` file to examine the staking oracle implementation.
 
-### 📖 Understanding the Code:
+#### 📖 Understanding the Code:
 
 🧩 The `StakingOracle` contract implements a decentralized economic incentive model:
 
 1. **`registerNode(uint256 initialPrice)`** - Allows users to register as oracle nodes
 
-* ⚠️ Requires a minimum stake of 1 ETH
+   * ⚠️ Requires a minimum stake of 1 ETH
 
-* 🧪 Checks that the node is not already registered
+   * 🧪 Checks that the node is not already registered
 
-* 🏗️ Creates a new `OracleNode` struct with the provided data
+   * 🏗️ Creates a new `OracleNode` struct with the provided data
 
-* ➕ Adds the node to the `nodeAddresses` array
+   * ➕ Adds the node to the `nodeAddresses` array
 
-* 📣 Emits the `NodeRegistered` and `PriceReported` events
+   * 📣 Emits the `NodeRegistered` and `PriceReported` events
 
 2. **`reportPrice(uint256 price)`** - Allows registered nodes to report new prices
 
-* 🧪 Checks that the caller is a registered node
+   * 🧪 Checks that the caller is a registered node
 
-* 🔍 Verifies the node has sufficient stake
+   * 🔍 Verifies the node has sufficient stake
 
-* 🔄 Updates the node's last reported price and timestamp
+   * 🔄 Updates the node's last reported price and timestamp
 
-* 📣 Emits the `PriceReported` event
+   * 📣 Emits the `PriceReported` event
 
-3. **`slashNodes()`** - Allows anyone to slash nodes that haven't reported recently
+3. **`separateStaleNodes(address[] memory nodesToSeparate)`** - Categorizes nodes into fresh and stale based on data recency
 
-* 🔎 Identifies nodes with stale data (older than 5 seconds)
+   * 📦 Takes an array of node addresses to categorize
 
-* ✂️ Slashes each stale node by 1 ETH
+   * ⏱️ Checks each node's last reported timestamp against `STALE_DATA_WINDOW` (5 seconds)
 
-* 🏅 Rewards the slasher with 10% of the slashed amount so we can guarantee bad nodes are always slashed
+   * 📊 Separates nodes into two arrays: fresh (recent data) and stale (old data)
 
-* 📣 Emits the `NodeSlashed` event for each slashed node
+   * 🧹 Returns trimmed arrays containing only the relevant addresses
 
-4. **`getPrice()`** - Aggregates prices from all active nodes
+   * 🔍 Used internally by other functions to filter active vs inactive nodes
 
-* 📦 Collects prices from all active nodes
+4. **`claimReward()`** - Allows registered nodes to claim their ORA token rewards
 
-* 🧹 Filters out nodes with stale data
+   * 🧪 Checks that the caller is a registered node
 
-* 🧮 Calculates the median of all valid prices
+   * 🔍 Calculates reward amount based on time elapsed since last claim
 
-* ⛔️ Reverts if no valid prices are available
+   * 💰 For active nodes (sufficient stake): rewards based on time since last claim
 
-### 🤔 Key Insights:
+   * ⚠️ For slashed nodes (insufficient stake): limited rewards only up to when they were slashed
+
+   * 🎁 Mints ORA tokens as rewards (time-based, scaled by 10^18)
+
+   * 📣 Emits the `NodeRewarded` event
+
+5. **`slashNodes()`** - Allows anyone to slash nodes that haven't reported recently
+
+   * 🔎 Identifies nodes with stale data (older than 5 seconds)
+
+   * ✂️ Slashes each stale node by 1 ETH
+
+   * 🏅 Rewards the slasher with 10% of the slashed amount so we can guarantee bad nodes are always slashed
+
+   * 📣 Emits the `NodeSlashed` event for each slashed node
+
+6. **`getPrice()`** - Aggregates prices from all active nodes
+
+   * 📦 Collects prices from all active nodes
+
+   * 🧹 Filters out nodes with stale data
+
+   * 🧮 Calculates the median of all valid prices
+
+   * ⛔️ Reverts if no valid prices are available
+
+**### 🤔 Key Insights:**
 
 - **Economic Incentives**: Nodes stake ETH and can be slashed for bad behavior, where in contrast, good behavior rewards the nodes with ORA token
 - **Decentralized**: Anyone can participate by staking, no central authority needed
@@ -378,7 +402,7 @@ yarn simulate:staking
 
 🤖 This will start automated bots that simulate honest and malicious node behavior, frequent and stale reports, and demonstrate how slashing and median aggregation impact the reported price. You can update the price variance and skip probability from the front-end as well.
 
-### 🥅 Goals:
+**### 🥅 Goals:**
 
 - Understand how economic incentives drive honest behavior
 - See how slashing mechanisms enforce data freshness
@@ -447,7 +471,7 @@ sequenceDiagram
 
 🔍 Open the `packages/hardhat/contracts/02_Optimistic/OptimisticOracle.sol` file to implement the optimistic oracle functionality.
 
-### ✏️ Tasks:
+**### ✏️ Tasks:**
 
 1. **Implement `assertEvent(string memory description, uint256 startTime, uint256 endTime)`**
 
@@ -478,7 +502,7 @@ Here are more granular instructions on setting up the EventAssertion struct:
 - reward should be `msg.value`
 - bond should be `FIXED_BOND`
 - startTime = `startTime`
-- endTime = `endTime`
+- endTime = `endTIme`
 - description = `description`
 - any remaining properties can be initialized with the default values (`false`, `address(0)`, etc.)
 
@@ -791,7 +815,7 @@ This function enables the asserter to get a refund of their posted reward when n
 
 This is the method that the decider will call to settle whether the proposer or disputer are correct.
 
-It should be:
+It should be;
 
 * 🧑‍⚖️ Only callable by the `decider` contract
 
@@ -949,7 +973,7 @@ yarn simulate:optimistic
 
 🤖 This will start automated bots that create assertions, propose outcomes, dispute proposals, and settle via the decider, so you can observe rewards, bonds, fees, and timing windows in a realistic flow.
 
-### 🥅 Goals:
+**### 🥅 Goals:**
 
 - Users can assert events with descriptions and time windows
 - Users can propose outcomes for asserted events
@@ -963,16 +987,23 @@ yarn simulate:optimistic
 
 🧠 Now let's analyze the strengths and weaknesses of each oracle design.
 
-### 📊 Comparison Table:
+**### 📊 Comparison Table:**
+
 | Aspect | Whitelist Oracle | Staking Oracle | Optimistic Oracle |
+
 |--------|------------------|----------------|-------------------|
+
 | **Speed** | Fast | Medium | Slow |
+
 | **Security** | Low (trusted authority) | Medium (economic incentives) | High (dispute resolution) |
+
 | **Decentralization** | Low | High | Medium |
+
 | **Cost** | Low | Medium | High |
+
 | **Complexity** | Simple | Medium | Complex |
 
-### 🤔 Key Trade-offs:
+**### 🤔 Key Trade-offs:**
 
 1. **Whitelist Oracle:**
 
@@ -1006,7 +1037,7 @@ yarn simulate:optimistic
 
 - ❌ More complex
 
-### 🎯 Understanding the "Why":
+**### 🎯 Understanding the "Why":**
 
 Each oracle design solves different problems:
 
@@ -1052,7 +1083,7 @@ Each oracle design solves different problems:
 
 > 🦊 Since we have deployed to a public testnet, you will now need to connect using a wallet you own or use a burner wallet. By default 🔥 `burner wallets` are only available on `hardhat` . You can enable them on every chain by setting `onlyLocalBurnerWallet: false` in your frontend config (`scaffold.config.ts` in `packages/nextjs/`)
 
-#### Configuration of Third-Party Services for Production-Grade Apps.
+**#### Configuration of Third-Party Services for Production-Grade Apps.**
 
 By default, 🏗 Scaffold-ETH 2 provides predefined API keys for popular services such as Alchemy and Etherscan. This allows you to begin developing and testing your applications more easily, avoiding the need to register for these services.
 
