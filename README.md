@@ -477,19 +477,19 @@ sequenceDiagram
 
 * 📣 This function allows users to assert that an event will have a true/false outcome
 
-* 💸 It should require a minimum reward amount (`MINIMUM_REWARD`) that is sent. if it is not enough then revert with `NotEnoughValue`
+* 💸 It should require a minimum reward `msg.value` (`MINIMUM_REWARD`) to be included with the transaction. If it is not enough, revert with `NotEnoughValue`
 
 * ⏱️ It should accept 0 for `startTime` and set it to `block.timestamp`
 
 * ⏳ It should accept 0 for `endTime` and default to `startTime + MINIMUM_ASSERTION_WINDOW`
 
-* 🕰️ It should check if the given `startTime` is less than the current time (`block.timestamp`) and revert with `InvalidTime` if it is earlier
+* 🕰️ It should check that the given `startTime` is less than the current time (`block.timestamp`) and revert with `InvalidTime` if it is not
 
-* 🧭 It should validate the time window given >= `MINIMUM_ASSERTION_WINDOW`, otherwise revert with `InvalidTime`
+* 🧭 It should validate the time window given is >= `MINIMUM_ASSERTION_WINDOW`, otherwise revert with `InvalidTime`
 
 * 🏗️ It should create a new `EventAssertion` struct with relevant properties set - see if you can figure it out
 
-* 🗂️ That struct should be stored in the `assertions` mapping. You can use `nextAssertionId` but don't forget to increment it
+* 🗂️ That struct should be stored in the `assertions` mapping. You can use `nextAssertionId` but don't forget to increment it!
 
 * 📣 It should emit the `EventAsserted` event
 
