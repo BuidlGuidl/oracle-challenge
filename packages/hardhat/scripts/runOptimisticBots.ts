@@ -36,7 +36,7 @@ const createAssertions = async (
   otherAccounts: WalletClient[],
   accountToAssertionIds: Record<string, bigint[]>,
 ) => {
-  const reward = await optimisticOracle.MINIMUM_REWARD();
+  const minReward = ethers.parseEther("0.01");
   let nextAssertionId = await optimisticOracle.nextAssertionId();
 
   for (const account of otherAccounts) {
@@ -47,7 +47,7 @@ const createAssertions = async (
         abi: optimisticDeployment.abi,
         functionName: "assertEvent",
         args: [getRandomQuestion(), 0n, 0n],
-        value: reward + (1n * 10n ** 18n * BigInt(Math.floor(Math.random() * 100))) / 100n,
+        value: minReward + (1n * 10n ** 18n * BigInt(Math.floor(Math.random() * 100))) / 100n,
       });
       console.log(`✅ created assertion ${nextAssertionId}`);
 
@@ -123,7 +123,6 @@ const disputeAssertions = async (
   accountToAssertionIds: Record<string, bigint[]>,
   otherAccounts: WalletClient[],
 ) => {
-  const bond = await optimisticOracle.FIXED_BOND();
   for (const account of otherAccounts) {
     const assertionIds = accountToAssertionIds[account.account.address];
     for (const assertionId of assertionIds) {
@@ -137,7 +136,7 @@ const disputeAssertions = async (
           abi: optimisticDeployment.abi,
           functionName: "disputeOutcome",
           args: [assertionId],
-          value: bond,
+          value: assertion.bond,
         });
         console.log(`⚔️ disputed assertion ${assertionId}`);
         // if disputed, then remove the assertion from the account
@@ -151,7 +150,7 @@ const disputeAssertions = async (
           abi: optimisticDeployment.abi,
           functionName: "disputeOutcome",
           args: [assertionId],
-          value: bond,
+          value: assertion.bond,
         });
         console.log(`⚔️ disputed assertion ${assertionId}`);
         // if disputed, then remove the assertion from the account

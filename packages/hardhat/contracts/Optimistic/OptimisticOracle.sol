@@ -34,9 +34,6 @@ contract OptimisticOracle {
     }
     uint256 public constant MINIMUM_ASSERTION_WINDOW = 3 minutes;
     uint256 public constant MINIMUM_DISPUTE_WINDOW = 3 minutes;
-    uint256 public constant FIXED_BOND = 0.1 ether;
-    uint256 public constant DECIDER_FEE = 0.2 ether;
-    uint256 public constant MINIMUM_REWARD = DECIDER_FEE + 0.01 ether;
     address public decider;
     address public owner;
     uint256 public nextAssertionId = 1;
@@ -84,7 +81,7 @@ contract OptimisticOracle {
     function assertEvent(string memory description, uint256 startTime, uint256 endTime) external payable returns (uint256) {
         uint256 assertionId = nextAssertionId;
         nextAssertionId++;
-        if (msg.value < MINIMUM_REWARD) revert NotEnoughValue();
+        if (msg.value == 0) revert NotEnoughValue();
 
         // Set default times if not provided
         if (startTime == 0) {
@@ -104,7 +101,7 @@ contract OptimisticOracle {
             proposedOutcome: false,
             resolvedOutcome: false,
             reward: msg.value,
-            bond: FIXED_BOND,
+            bond: msg.value * 2,
             startTime: startTime,
             endTime: endTime,
             claimed: false,
@@ -191,10 +188,10 @@ contract OptimisticOracle {
         assertion.claimed = true;
 
         // Send decider fee
-        (bool deciderSuccess, ) = payable(decider).call{value: DECIDER_FEE}("");
+        (bool deciderSuccess, ) = payable(decider).call{value: assertion.bond}("");
         if (!deciderSuccess) revert TransferFailed();
         
-        uint256 totalReward = (assertion.reward + assertion.bond + assertion.bond) - DECIDER_FEE; // reward + proposer bond + disputer bond - decider fee
+        uint256 totalReward = assertion.reward + assertion.bond; // reward + proposer bond
 
         // Send reward to winner
         (bool winnerSuccess, ) = payable(assertion.winner).call{value: totalReward}("");

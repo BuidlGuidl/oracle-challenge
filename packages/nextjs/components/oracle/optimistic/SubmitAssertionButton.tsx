@@ -10,7 +10,6 @@ import { useGlobalState } from "~~/services/store/store";
 import { getRandomQuestion } from "~~/utils/helpers";
 import { notification } from "~~/utils/scaffold-eth";
 
-const MINIMUM_REWARD = 0.21;
 const MINIMUM_ASSERTION_WINDOW = 3;
 
 const getStartTimestamp = (timestamp: bigint, startInMinutes: string) => {
@@ -56,8 +55,8 @@ const SubmitAssertionModal = ({ isOpen, onClose }: SubmitAssertionModalProps) =>
       return;
     }
 
-    if (Number(reward) < MINIMUM_REWARD) {
-      notification.error(`Reward must be at least ${MINIMUM_REWARD} ETH`);
+    if (Number(reward) === 0) {
+      notification.error(`Reward must be greater than 0 ETH`);
       return;
     }
 
@@ -176,7 +175,7 @@ const SubmitAssertionModal = ({ isOpen, onClose }: SubmitAssertionModalProps) =>
                 </label>
                 <IntegerInput
                   name="reward"
-                  placeholder={`Minimum ${MINIMUM_REWARD} ETH`}
+                  placeholder={`0.01 ETH`}
                   value={reward}
                   onChange={newValue => setReward(newValue)}
                   disableMultiplyBy1e18
