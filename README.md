@@ -56,7 +56,7 @@ Oracles are bridges between blockchains and the external world. They solve a fun
 
 ```sh
 
-npx create-eth@0.2.4 -e scaffold-eth/se-2-challenges:challenge-oracles challenge-oracles
+npx create-eth@1.0.2 -e scaffold-eth/se-2-challenges:challenge-oracles challenge-oracles
 
 cd challenge-oracles
 
@@ -102,33 +102,7 @@ yarn start
 
 💰 The implementation we'll be looking at is a **price** oracle. Price oracles are one of the most common and critical types of oracles in DeFi, as they enable smart contracts to make decisions based on real-world asset prices. Our whitelist price oracle collects price reports from multiple trusted sources (instances of `SimpleOracle`) and returns their median value.
 
-🗂️ The whitelist oracle contracts are located in `packages/hardhat/contracts/00_Whitelist/`. Go check them out and reference the following descriptions.
-
-### Core Components
-
-1. 🔗 **SimpleOracle (`SimpleOracle.sol`)**
-
-- Basic oracle contract that allows price updates from the contract owner (We have commented out the onlyOwner modifier to allow you to impersonate the owner)
-
-- Each SimpleOracle instance represents one trusted data source
-
-2. 🏛️ **WhitelistOracle (`WhitelistOracle.sol`)**
-
-- Central contract that aggregates multiple SimpleOracle contracts
-
-- Only the owner can add/remove SimpleOracle contracts from the whitelist (We have commented out the onlyOwner modifier to allow you to impersonate the owner)
-
-- Uses median calculation for consensus among whitelisted sources
-
-- Filters out stale data to ensure freshness
-
-- Simple architecture but requires trust in the whitelist authority
-
----
-
-## Checkpoint 2: 🔗 Simple Oracle & Whitelist Oracle - Building Blocks & Aggregation
-
-🧭 Let's understand how oracle systems are built from simple components and then aggregated for better reliability. We'll examine both the basic building block (SimpleOracle) and how multiple simple oracles can be combined into a more robust system (WhitelistOracle).
+🧭 Let's understand how this oracle system works. We'll examine both the basic building block (SimpleOracle) and how multiple simple oracles can be combined into a more robust system (WhitelistOracle).
 
 ### 🔗 Simple Oracle - The Building Block
 
@@ -278,7 +252,7 @@ WhitelistOracle → getPrice() → [100, 102, 98] → median(100) → 100
 
 </details>
 
-👊 **Manual Testing**: Try manually changing the price of individual SimpleOracle contracts and adding new oracle nodes to see how the aggregated price changes:
+👊 **Manual Testing**: Notice how the onlyOwner modifiers are commented out to allow you to have full control. Try manually changing the price of individual SimpleOracle contracts and adding new oracle nodes to see how the aggregated price changes:
 
 1. **Change Prices**: Use the frontend to modify individual oracle prices
 
@@ -304,7 +278,7 @@ yarn simulate:whitelist
 - Look at these examples "in the wild" from early DeFi: [Simple Oracle](https://github.com/dapphub/ds-value), [Whitelist Oracle](https://github.com/sky-ecosystem/medianizer)
 ---
 
-## Checkpoint 3: 💰 Staking Oracle - Economic Incentives
+## Checkpoint 2: 💰 Staking Oracle - Economic Incentives
 
 🧭 Now let's explore a decentralized oracle that uses economic incentives to ensure honest behavior. Nodes stake ETH to participate and can be slashed for bad behavior. We will also issue rewards in the form of an ERC20 token called ORA to incentivise participation in the system.
 
@@ -407,13 +381,26 @@ yarn simulate:staking
 - Understand how economic incentives drive honest behavior
 - See how slashing mechanisms enforce data freshness
 - Observe the decentralized nature of the system
-- Recognize the trade-offs and risks associated with type of oracle
+- Recognize the trade-offs and risks associated with this type of oracle
+- Oracles that require staking include [Chainlink](https://chain.link) and [PYTH](https://www.pyth.network/)
 
 ---
 
-## Checkpoint 4: 🧠 Optimistic Oracle Architecture
+## Checkpoint 3: 🧠 Optimistic Oracle Architecture
 
-🧭 Before coding, understand the flow at a glance.
+🤿 Now let's dive into the most sophisticated of this challenge's three designs: the **Optimistic Oracle**. Unlike the previous two designs that focus on price data, this one will handle any type of binary (true/false) question about real-world events.
+
+🎯 **What makes it "optimistic"?** The system assumes proposals are correct unless someone disputes them. This creates a game-theoretic mechanism where economic incentives encourage honest behavior while providing strong security guarantees through dispute resolution.
+
+💡 **Key Innovation**: Instead of requiring constant active participation from multiple parties (like staking oracles), optimistic oracles only require intervention when something goes wrong. This makes them highly efficient for events that don't need frequent updates.
+
+🔍 **Real-World Applications**:
+- **Cross-chain bridges**: "Did transaction X happen on chain Y?"
+- **Insurance claims**: "Did flight ABC get delayed by more than 2 hours?"
+- **Prediction markets**: "Did candidate X win the election?"
+- **DeFi protocols**: "Did token X reach price Y on date Z?"
+
+🧭 Before coding, let's understand the flow at a glance.
 
 **Roles**:
 - **asserter**: posts an assertion + reward
@@ -429,23 +416,28 @@ yarn simulate:staking
 - Reward + bonds flow to the winner; a fixed fee goes to the decider in disputes
 
 ```mermaid
+
 sequenceDiagram
   participant A as Asserter
   participant P as Proposer
   participant D as Disputer
   participant C as Decider
   participant O as OptimisticOracle
-
   A->>O: assertEvent(description, startTime, endTime) + reward
   Note over O: Wait until startTime
-  P->>O: proposeOutcome(assertionId, outcome) + bond
-  Note over O: Start dispute window
-  alt No dispute before deadline
-    O-->>P: Claim undisputed rewards -> reward + proposer bond
-  else Dispute filed in window
-    D->>O: disputeOutcome(assertionId) + bond
-    C->>O: settleAssertion(assertionId, resolvedOutcome)
-    O-->>Winner: claimDisputedReward() -> reward + both bonds - decider fee
+  alt No proposal before endTime
+    A->>O: claimRefund(assertionId)
+    O-->>A: refund reward
+  else Proposal received
+    P->>O: proposeOutcome(assertionId, outcome) + bond
+    Note over O: Start dispute window
+    alt No dispute before deadline
+      O-->>P: Claim undisputed rewards -> reward + proposer bond
+    else Dispute filed in window
+      D->>O: disputeOutcome(assertionId) + bond
+      C->>O: settleAssertion(assertionId, resolvedOutcome)
+      O-->>Winner: claimDisputedReward() -> reward + both bonds - decider fee
+    end
   end
 ```
 
@@ -455,9 +447,11 @@ sequenceDiagram
 - Before a specific deadline
 - With a reward
 
+🦗 If no one answers before the end of the assertion window, the asserter can claim a refund.
+
 💡 If someone knows the answer within the correct time then they **propose** the answer, posting a bond. This bond is a risk to them because if their answer is thought to be wrong by someone else then they might lose it. This keeps people economically tied to the **proposals** they make.
 
-⏳ Then if no one **disputes** the proposal before the dispute window is over then the proposal is considered to be true. The dispute window should give anyone ample time to submit a dispute.
+⏳ Then if no one **disputes** the proposal before the dispute window is over then the proposal is considered to be true, and the proposer may claim the reward and their bond. The dispute window should give anyone ample time to submit a dispute.
 
 ⚖️ If someone does **dispute** during the dispute window then they must also post a bond equal to the proposer's bond. This kicks the assertion out of any particular timeline and puts it in a state where it is waiting for a decision from the **decider**. Once the decider contract has **settled** the assertion, the winner can claim the reward and both of the bonds that were posted, subtracting a small fee that goes to the decider.
 
@@ -465,9 +459,13 @@ sequenceDiagram
 
 🔗 Look at how [UMA](https://uma.xyz/) does this with their Optimistic Oracle (OO). **This contract is based UMA's OO design**.
 
-## Checkpoint 5: ⚡ Optimistic Oracle - Dispute Resolution
+## Checkpoint 4: ⚡ Optimistic Oracle - Dispute Resolution
 
-⚙️ Now let's implement the most sophisticated oracle design: the optimistic oracle. This system allows anyone to propose outcomes and others to dispute them, with a decider contract resolving disputes. This is the main implementation challenge where you'll build the core functionality from scratch.
+👩‍💻 Now it's (finally) time to build! Unlike the previous checkpoints where you explored existing implementations, this section challenges you to implement the optimistic oracle system from scratch. You'll write the core functions that handle assertions, proposals, disputes, and settlements.
+
+🎯 **Your Mission**: Complete the missing function implementations in the `OptimisticOracle.sol` contract. The contract skeleton is already provided with all the necessary structs, events, and modifiers - you just need to fill in the logic.
+
+🧪 **Testing Strategy**: Each function you implement can be tested individually using the provided test suite. Run `yarn test` after implementing each function to verify your solution works correctly.
 
 🔍 Open the `packages/hardhat/contracts/02_Optimistic/OptimisticOracle.sol` file to implement the optimistic oracle functionality.
 
@@ -971,7 +969,7 @@ yarn simulate:optimistic
 
 ```
 
-🤖 This will start automated bots that create assertions, propose outcomes, dispute proposals, and settle via the decider, so you can observe rewards, bonds, fees, and timing windows in a realistic flow.
+🤖 This will start automated bots that create assertions, propose outcomes, and dispute proposals, so you can observe rewards, bonds, fees, and timing windows in a realistic flow. It is up to you to settle disputes!
 
 ### 🥅 Goals:
 
@@ -983,7 +981,7 @@ yarn simulate:optimistic
 - Bond amounts are properly validated
 ---
 
-## Checkpoint 6: 🔍 Oracle Comparison & Trade-offs
+## Checkpoint 5: 🔍 Oracle Comparison & Trade-offs
 
 🧠 Now let's analyze the strengths and weaknesses of each oracle design.
 
@@ -992,7 +990,7 @@ yarn simulate:optimistic
 |--------|------------------|----------------|-------------------|
 | **Speed** | Fast | Medium | Slow |
 | **Security** | Low (trusted authority) | Medium (economic incentives) | High (dispute resolution) |
-| **Decentralization** | Low | High | Medium |
+| **Decentralization** | Low | High | Depends on Decider Implementation |
 | **Cost** | Low | Medium | High |
 | **Complexity** | Simple | Medium | Complex |
 
@@ -1024,7 +1022,7 @@ yarn simulate:optimistic
 
 - ✅ Can be used for any type of data (not just prices)
 
-- ✴️ Decider role is the weakest link and should be carefully implemented
+- ✴️ Decider role is the weakest link and should be carefully implemented though it is up to the consuming application whether it wants to wait for a resolution or post another assertion and hope a proposal passes without dispute
 
 - ❌ Higher latency
 
@@ -1040,7 +1038,7 @@ Each oracle design solves different problems:
 
 ---
 
-## Checkpoint 7: 💾 Deploy your contracts! 🛰
+## Checkpoint 6: 💾 Deploy your contracts! 🛰
 
 🎉 Well done on building the optimistic oracle system! Now, let's get it on a public testnet.
 
@@ -1058,7 +1056,7 @@ Each oracle design solves different problems:
 
 ---
 
-## Checkpoint 8: 🚢 Ship your frontend! 🚁
+## Checkpoint 7: 🚢 Ship your frontend! 🚁
 
 ✏️ Edit your frontend config in `packages/nextjs/scaffold.config.ts` to change the `targetNetwork` to `chains.sepolia` (or your chosen deployed network).
 
@@ -1091,7 +1089,7 @@ For production-grade applications, it's recommended to obtain your own API keys 
 
 ---
 
-## Checkpoint 9: 📜 Contract Verification
+## Checkpoint 8: 📜 Contract Verification
 
 📝 Run the `yarn verify --network your_network` command to verify your optimistic oracle contracts on Etherscan 🛰.
 
@@ -1105,7 +1103,7 @@ For production-grade applications, it's recommended to obtain your own API keys 
 
 > 💬 Problems, questions, comments on the stack? Post them to the [🏗 scaffold-eth developers chat](https://t.me/joinchat/F7nCRK3kI93PoCOk)
 
-## Checkpoint 10: More On Oracles
+## Checkpoint 9: More On Oracles
 
 Oracles are fundamental infrastructure for the decentralized web. They enable smart contracts to interact with real-world data, making blockchain applications truly useful beyond simple token transfers.
 

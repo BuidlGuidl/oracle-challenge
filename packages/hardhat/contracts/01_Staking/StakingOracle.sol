@@ -185,4 +185,6 @@ contract StakingOracle {
     function getNodeAddresses() public view returns (address[] memory) {
         return nodeAddresses;
     }
+
+    // Notably missing a way to unstake and exit your node but not needed for the challenge
 }
