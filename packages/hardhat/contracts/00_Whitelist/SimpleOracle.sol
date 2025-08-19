@@ -9,10 +9,13 @@ contract SimpleOracle {
 
     constructor() {}
 
-    // Note: In a real oracle implementation, this function would typically have
-    // an onlyOwner modifier to restrict who can update prices. We've removed
-    // it here to make prices easily editable in the frontend.
-    function setPrice(uint256 _newPrice) public {
+    modifier onlyOwner() {
+        // Intentionally removing the owner requirement to make it easy for you to impersonate the owner
+        // require(msg.sender == owner, "Not the owner");
+        _;
+    }
+
+    function setPrice(uint256 _newPrice) public onlyOwner {
         price = _newPrice;
         timestamp = block.timestamp;
         emit PriceUpdated(_newPrice);

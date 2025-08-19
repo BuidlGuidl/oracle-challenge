@@ -72,6 +72,13 @@ contract OptimisticOracle {
     }
 
     /**
+     * @notice Get the assertion details.
+     */
+    function getAssertion(uint256 assertionId) external view returns (EventAssertion memory) {
+        return assertions[assertionId];
+    }
+
+    /**
      * @notice Assert that an event will have a true/false outcome.
      * @dev The `description` is used to identify the event (e.g. "Did X happen by time Y?")
      * @param description The description of the event
@@ -280,12 +287,5 @@ contract OptimisticOracle {
             if (a.winner == address(0)) revert AwaitingDecider();
             return a.resolvedOutcome;
         }
-    }
-
-    /**
-     * @notice Get the assertion details.
-     */
-    function getAssertion(uint256 assertionId) external view returns (EventAssertion memory) {
-        return assertions[assertionId];
     }
 }
