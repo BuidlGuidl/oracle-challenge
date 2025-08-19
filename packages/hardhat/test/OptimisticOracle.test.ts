@@ -51,13 +51,9 @@ describe("OptimisticOracle", function () {
     it("Should have correct constants", async function () {
       const minimumAssertionWindow = await optimisticOracle.MINIMUM_ASSERTION_WINDOW();
       const minimumDisputeWindow = await optimisticOracle.MINIMUM_DISPUTE_WINDOW();
-      const fixedBond = await optimisticOracle.FIXED_BOND();
-      const deciderFee = await optimisticOracle.DECIDER_FEE();
 
       expect(minimumAssertionWindow).to.equal(180n); // 3 minutes
       expect(minimumDisputeWindow).to.equal(180n); // 3 minutes
-      expect(fixedBond).to.equal(ethers.parseEther("0.1"));
-      expect(deciderFee).to.equal(ethers.parseEther("0.2"));
     });
 
     it("Should start with nextAssertionId at 1", async function () {
@@ -107,7 +103,7 @@ describe("OptimisticOracle", function () {
 
     it("Should reject assertions with insufficient reward", async function () {
       const description = "Will Bitcoin reach $1m by end of 2026?";
-      const insufficientReward = ethers.parseEther("0.1"); // Less than minimum
+      const insufficientReward = ethers.parseEther("0.0");
 
       await expect(
         optimisticOracle.connect(asserter).assertEvent(description, 0, 0, { value: insufficientReward }),
@@ -134,7 +130,7 @@ describe("OptimisticOracle", function () {
     });
 
     it("Should allow proposing outcomes with correct bond", async function () {
-      const bond = await optimisticOracle.FIXED_BOND();
+      const bond = reward * 2n;
       const outcome = true;
 
       const tx = await optimisticOracle.connect(proposer).proposeOutcome(assertionId, outcome, { value: bond });
@@ -156,7 +152,7 @@ describe("OptimisticOracle", function () {
     });
 
     it("Should reject duplicate proposals", async function () {
-      const bond = await optimisticOracle.FIXED_BOND();
+      const bond = reward * 2n;
       const outcome = true;
 
       await optimisticOracle.connect(proposer).proposeOutcome(assertionId, outcome, { value: bond });
@@ -183,12 +179,12 @@ describe("OptimisticOracle", function () {
       const parsedEvent = optimisticOracle.interface.parseLog(event as any);
       assertionId = parsedEvent!.args[0];
 
-      const bond = await optimisticOracle.FIXED_BOND();
+      const bond = reward * 2n;
       await optimisticOracle.connect(proposer).proposeOutcome(assertionId, true, { value: bond });
     });
 
     it("Should allow disputing outcomes with correct bond", async function () {
-      const bond = await optimisticOracle.FIXED_BOND();
+      const bond = reward * 2n;
 
       const tx = await optimisticOracle.connect(disputer).disputeOutcome(assertionId, { value: bond });
 
@@ -212,14 +208,14 @@ describe("OptimisticOracle", function () {
       await ethers.provider.send("evm_increaseTime", [181]); // 3 minutes + 1 second
       await ethers.provider.send("evm_mine");
 
-      const bond = await optimisticOracle.FIXED_BOND();
+      const bond = reward * 2n;
       await expect(
         optimisticOracle.connect(disputer).disputeOutcome(assertionId, { value: bond }),
       ).to.be.revertedWithCustomError(optimisticOracle, "InvalidTime");
     });
 
     it("Should reject duplicate disputes", async function () {
-      const bond = await optimisticOracle.FIXED_BOND();
+      const bond = reward * 2n;
       await optimisticOracle.connect(disputer).disputeOutcome(assertionId, { value: bond });
 
       await expect(
@@ -244,7 +240,7 @@ describe("OptimisticOracle", function () {
       const parsedEvent = optimisticOracle.interface.parseLog(event as any);
       assertionId = parsedEvent!.args[0];
 
-      const bond = await optimisticOracle.FIXED_BOND();
+      const bond = reward * 2n;
       await optimisticOracle.connect(proposer).proposeOutcome(assertionId, true, { value: bond });
     });
 
@@ -258,8 +254,8 @@ describe("OptimisticOracle", function () {
       const receipt = await tx.wait();
       const finalBalance = await ethers.provider.getBalance(proposer.address);
 
-      // Check that proposer received the reward (reward + bond - decider fee - gas costs)
-      const expectedReward = reward + (await optimisticOracle.FIXED_BOND());
+      // Check that proposer received the reward (reward + bond - gas costs)
+      const expectedReward = reward + reward * 2n;
       const gasCost = receipt!.gasUsed * receipt!.gasPrice!;
       expect(finalBalance - initialBalance + gasCost).to.equal(expectedReward);
     });
@@ -272,7 +268,7 @@ describe("OptimisticOracle", function () {
     });
 
     it("Should reject claiming disputed assertions", async function () {
-      const bond = await optimisticOracle.FIXED_BOND();
+      const bond = reward * 2n;
       await optimisticOracle.connect(disputer).disputeOutcome(assertionId, { value: bond });
 
       await expect(optimisticOracle.connect(proposer).claimUndisputedReward(assertionId)).to.be.revertedWithCustomError(
@@ -310,7 +306,7 @@ describe("OptimisticOracle", function () {
       const parsedEvent = optimisticOracle.interface.parseLog(event as any);
       assertionId = parsedEvent!.args[0];
 
-      const bond = await optimisticOracle.FIXED_BOND();
+      const bond = reward * 2n;
       await optimisticOracle.connect(proposer).proposeOutcome(assertionId, true, { value: bond });
       await optimisticOracle.connect(disputer).disputeOutcome(assertionId, { value: bond });
     });
@@ -324,9 +320,8 @@ describe("OptimisticOracle", function () {
       const receipt = await tx.wait();
       const finalBalance = await ethers.provider.getBalance(proposer.address);
 
-      // Check that proposer received the reward (reward + 2*bond - decider fee - gas costs)
-      const expectedReward =
-        reward + (await optimisticOracle.FIXED_BOND()) * 2n - (await optimisticOracle.DECIDER_FEE());
+      // Check that proposer received the reward (reward + bond - gas costs)
+      const expectedReward = reward * 3n;
       const gasCost = receipt!.gasUsed * receipt!.gasPrice!;
       expect(finalBalance - initialBalance + gasCost).to.equal(expectedReward);
     });
@@ -341,8 +336,7 @@ describe("OptimisticOracle", function () {
       const finalBalance = await ethers.provider.getBalance(disputer.address);
 
       // Check that disputer received the reward
-      const expectedReward =
-        reward + (await optimisticOracle.FIXED_BOND()) * 2n - (await optimisticOracle.DECIDER_FEE());
+      const expectedReward = reward * 3n;
       const gasCost = receipt!.gasUsed * receipt!.gasPrice!;
       expect(finalBalance - initialBalance + gasCost).to.equal(expectedReward);
     });
@@ -398,7 +392,7 @@ describe("OptimisticOracle", function () {
     });
 
     it("Should reject refund claiming for assertions with proposals", async function () {
-      const bond = await optimisticOracle.FIXED_BOND();
+      const bond = reward * 2n;
       await optimisticOracle.connect(proposer).proposeOutcome(assertionId, true, { value: bond });
 
       await expect(optimisticOracle.connect(asserter).claimRefund(assertionId)).to.be.revertedWithCustomError(
@@ -436,7 +430,7 @@ describe("OptimisticOracle", function () {
       const parsedEvent = optimisticOracle.interface.parseLog(event as any);
       assertionId = parsedEvent!.args[0];
 
-      const bond = await optimisticOracle.FIXED_BOND();
+      const bond = reward * 2n;
       await optimisticOracle.connect(proposer).proposeOutcome(assertionId, true, { value: bond });
       await optimisticOracle.connect(disputer).disputeOutcome(assertionId, { value: bond });
     });
@@ -471,7 +465,7 @@ describe("OptimisticOracle", function () {
       const newParsedEvent = optimisticOracle.interface.parseLog(newEvent as any);
       const newAssertionId = newParsedEvent!.args[0];
 
-      const bond = await optimisticOracle.FIXED_BOND();
+      const bond = reward * 2n;
       await optimisticOracle.connect(proposer).proposeOutcome(newAssertionId, true, { value: bond });
 
       const resolvedOutcome = true;
@@ -503,7 +497,7 @@ describe("OptimisticOracle", function () {
       expect(state).to.equal(State.Asserted); // Asserted
 
       // Proposed state
-      const bond = await optimisticOracle.FIXED_BOND();
+      const bond = reward * 2n;
       await optimisticOracle.connect(proposer).proposeOutcome(assertionId, true, { value: bond });
       state = await optimisticOracle.getState(assertionId);
       expect(state).to.equal(State.Proposed); // Proposed
@@ -531,7 +525,7 @@ describe("OptimisticOracle", function () {
       const parsedEvent = optimisticOracle.interface.parseLog(event as any);
       const assertionId = parsedEvent!.args[0];
 
-      const bond = await optimisticOracle.FIXED_BOND();
+      const bond = reward * 2n;
       await optimisticOracle.connect(proposer).proposeOutcome(assertionId, true, { value: bond });
 
       // Fast forward time past dispute window
@@ -578,7 +572,7 @@ describe("OptimisticOracle", function () {
       if (!parsedEvent) throw new Error("Event not found");
       const assertionId = parsedEvent.args[0];
 
-      const bond = await optimisticOracle.FIXED_BOND();
+      const bond = reward * 2n;
       await expect(
         optimisticOracle.connect(proposer).proposeOutcome(assertionId, true, { value: bond }),
       ).to.be.revertedWithCustomError(optimisticOracle, "InvalidTime");
@@ -602,7 +596,7 @@ describe("OptimisticOracle", function () {
       await ethers.provider.send("evm_increaseTime", [201]);
       await ethers.provider.send("evm_mine");
 
-      const bond = await optimisticOracle.FIXED_BOND();
+      const bond = reward * 2n;
       await expect(
         optimisticOracle.connect(proposer).proposeOutcome(assertionId, true, { value: bond }),
       ).to.be.revertedWithCustomError(optimisticOracle, "InvalidTime");
@@ -622,7 +616,7 @@ describe("OptimisticOracle", function () {
       if (!parsedEvent) throw new Error("Event not found");
       const assertionId = parsedEvent.args[0];
 
-      const bond = await optimisticOracle.FIXED_BOND();
+      const bond = reward * 2n;
 
       // Before startTime - should fail
       await expect(

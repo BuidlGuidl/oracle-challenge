@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     Decider: {
-      address: "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
+      address: "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8",
       abi: [
         {
           inputs: [
@@ -104,7 +104,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     OptimisticOracle: {
-      address: "0x9A676e781A523b5d0C0e43731313A708CB607508",
+      address: "0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9",
       abi: [
         {
           inputs: [
@@ -353,32 +353,6 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "DECIDER_FEE",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "FIXED_BOND",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
           name: "MINIMUM_ASSERTION_WINDOW",
           outputs: [
             {
@@ -393,19 +367,6 @@ const deployedContracts = {
         {
           inputs: [],
           name: "MINIMUM_DISPUTE_WINDOW",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "MINIMUM_REWARD",
           outputs: [
             {
               internalType: "uint256",
@@ -782,7 +743,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     SimpleOracle_1: {
-      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      address: "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
       abi: [
         {
           inputs: [],
@@ -863,7 +824,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     SimpleOracle_10: {
-      address: "0x700b6A60ce7EaaEA56F065753d8dcB9653dbAD35",
+      address: "0xe1Aa25618fA0c7A1CFDab5d6B456af611873b629",
       abi: [
         {
           inputs: [],
@@ -944,7 +905,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     SimpleOracle_2: {
-      address: "0x8464135c8F25Da09e49BC8782676a84730C318bC",
+      address: "0xbCF26943C0197d2eE0E5D05c716Be60cc2761508",
       abi: [
         {
           inputs: [],
@@ -1025,7 +986,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     SimpleOracle_3: {
-      address: "0x663F3ad617193148711d28f5334eE4Ed07016602",
+      address: "0x6e989C01a3e3A94C973A62280a72EC335598490e",
       abi: [
         {
           inputs: [],
@@ -1106,7 +1067,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     SimpleOracle_4: {
-      address: "0x057ef64E23666F000b34aE31332854aCBd1c8544",
+      address: "0xe4EB561155AFCe723bB1fF8606Fbfe9b28d5d38D",
       abi: [
         {
           inputs: [],
@@ -1187,7 +1148,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     SimpleOracle_5: {
-      address: "0xbdEd0D2bf404bdcBa897a74E6657f1f12e5C6fb6",
+      address: "0x71a9d115E322467147391c4a71D85F8e1cA623EF",
       abi: [
         {
           inputs: [],
@@ -1268,7 +1229,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     SimpleOracle_6: {
-      address: "0x0116686E2291dbd5e317F47faDBFb43B599786Ef",
+      address: "0x2706A171ECb68E0038378D40Dd1d136361d0cB7d",
       abi: [
         {
           inputs: [],
@@ -1349,7 +1310,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     SimpleOracle_7: {
-      address: "0x7ef8E99980Da5bcEDcF7C10f41E55f759F6A174B",
+      address: "0xbD3afEF4b26918cDb922F9D80aeA9b8e64524432",
       abi: [
         {
           inputs: [],
@@ -1430,7 +1391,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     SimpleOracle_8: {
-      address: "0xef11D1c2aA48826D4c41e54ab82D1Ff5Ad8A64Ca",
+      address: "0x332Fb35767182F8ac9F9C1405db626105F6694E0",
       abi: [
         {
           inputs: [],
@@ -1511,7 +1472,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     SimpleOracle_9: {
-      address: "0x95bD8D42f30351685e96C62EDdc0d0613bf9a87A",
+      address: "0xc039b3B46814D8388e5205D37Dd0D154D806F1f4",
       abi: [
         {
           inputs: [],
@@ -1592,7 +1553,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     StakingOracle: {
-      address: "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+      address: "0x9E545E3C0baAB3E08CdfD552C960A1050f373042",
       abi: [
         {
           inputs: [],
@@ -1696,6 +1657,19 @@ const deployedContracts = {
         },
         {
           inputs: [],
+          name: "SLASHER_REWARD_PERCENTAGE",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
           name: "STALE_DATA_WINDOW",
           outputs: [
             {
@@ -1705,6 +1679,13 @@ const deployedContracts = {
             },
           ],
           stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "claimReward",
+          outputs: [],
+          stateMutability: "nonpayable",
           type: "function",
         },
         {
@@ -1782,6 +1763,16 @@ const deployedContracts = {
               name: "lastReportedTimestamp",
               type: "uint256",
             },
+            {
+              internalType: "uint256",
+              name: "lastClaimedTimestamp",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "lastSlashedTimestamp",
+              type: "uint256",
+            },
           ],
           stateMutability: "view",
           type: "function",
@@ -1813,7 +1804,13 @@ const deployedContracts = {
           type: "function",
         },
         {
-          inputs: [],
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "initialPrice",
+              type: "uint256",
+            },
+          ],
           name: "registerNode",
           outputs: [],
           stateMutability: "payable",
@@ -1833,8 +1830,32 @@ const deployedContracts = {
           type: "function",
         },
         {
+          inputs: [
+            {
+              internalType: "address[]",
+              name: "nodesToSeparate",
+              type: "address[]",
+            },
+          ],
+          name: "separateStaleNodes",
+          outputs: [
+            {
+              internalType: "address[]",
+              name: "fresh",
+              type: "address[]",
+            },
+            {
+              internalType: "address[]",
+              name: "stale",
+              type: "address[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
           inputs: [],
-          name: "validateNodes",
+          name: "slashNodes",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
@@ -1843,7 +1864,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     WhitelistOracle: {
-      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      address: "0x59b670e9fA9D0A427751Af201D676719a970857b",
       abi: [
         {
           inputs: [],
