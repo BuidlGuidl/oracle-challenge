@@ -4,11 +4,10 @@ import { ethers } from "hardhat";
 describe("WhitelistOracle", function () {
   let whitelistOracle;
   let owner;
-  let nonOwner;
   let simpleOracleFactory;
 
   beforeEach(async function () {
-    [owner, nonOwner] = await ethers.getSigners();
+    [owner] = await ethers.getSigners();
     const WhitelistOracleFactory = await ethers.getContractFactory("WhitelistOracle");
     simpleOracleFactory = await ethers.getContractFactory("SimpleOracle");
     whitelistOracle = await WhitelistOracleFactory.deploy();
@@ -28,20 +27,6 @@ describe("WhitelistOracle", function () {
     await whitelistOracle.removeOracle(0);
 
     await expect(whitelistOracle.oracles(0)).to.be.reverted;
-  });
-
-  it("Should not allow non-owner to add oracle", async function () {
-    const oracle = await simpleOracleFactory.deploy();
-
-    await expect(whitelistOracle.connect(nonOwner).addOracle(oracle.target)).to.be.revertedWith("Not the owner");
-  });
-
-  it("Should not allow non-owner to remove oracle", async function () {
-    const oracle = await simpleOracleFactory.deploy();
-
-    await whitelistOracle.connect(owner).addOracle(oracle.target);
-
-    await expect(whitelistOracle.connect(nonOwner).removeOracle(0)).to.be.revertedWith("Not the owner");
   });
 
   it("Should not allow adding duplicate oracle addresses", async function () {

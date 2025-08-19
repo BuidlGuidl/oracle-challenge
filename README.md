@@ -413,7 +413,7 @@ yarn simulate:staking
 - Dispute window: short period after a proposal when disputes are allowed
 
 **Incentives**:
-- Reward + bonds flow to the winner; a fixed fee goes to the decider in disputes
+- Reward + a bond refund flow to the winner; the loser's bond goes to the decider in disputes
 
 ```mermaid
 
@@ -432,11 +432,11 @@ sequenceDiagram
     P->>O: proposeOutcome(assertionId, outcome) + bond
     Note over O: Start dispute window
     alt No dispute before deadline
-      O-->>P: Claim undisputed rewards -> reward + proposer bond
+      O-->>P: Claim undisputed rewards -> reward + bond refund
     else Dispute filed in window
       D->>O: disputeOutcome(assertionId) + bond
       C->>O: settleAssertion(assertionId, resolvedOutcome)
-      O-->>Winner: claimDisputedReward() -> reward + both bonds - decider fee
+      O-->>Winner: claimDisputedReward() -> reward + bond refund
     end
   end
 ```
@@ -453,7 +453,7 @@ sequenceDiagram
 
 ⏳ Then if no one **disputes** the proposal before the dispute window is over then the proposal is considered to be true, and the proposer may claim the reward and their bond. The dispute window should give anyone ample time to submit a dispute.
 
-⚖️ If someone does **dispute** during the dispute window then they must also post a bond equal to the proposer's bond. This kicks the assertion out of any particular timeline and puts it in a state where it is waiting for a decision from the **decider**. Once the decider contract has **settled** the assertion, the winner can claim the reward and both of the bonds that were posted, subtracting a small fee that goes to the decider.
+⚖️ If someone does **dispute** during the dispute window then they must also post a bond equal to the proposer's bond. This kicks the assertion out of any particular timeline and puts it in a state where it is waiting for a decision from the **decider**. Once the decider contract has **settled** the assertion, the winner can claim the reward and their posted bond. The decider gets the loser's bond.
 
 🧑‍⚖️ Now, as we mentioned earlier, this oracle has a role called the **decider**. For this example it is just a simple contract that anyone can call to settle disputes. One could imagine in a live oracle you would want something more robust such as a group of people who vote to settle disputes.
 
@@ -475,7 +475,7 @@ sequenceDiagram
 
 * 📣 This function allows users to assert that an event will have a true/false outcome
 
-* 💸 It should require a minimum reward `msg.value` (`MINIMUM_REWARD`) to be included with the transaction. If it is not enough, revert with `NotEnoughValue`
+* 💸 It should require that the reward (`msg.value`) is greater than 0 . If it is not then revert with `NotEnoughValue`
 
 * ⏱️ It should accept 0 for `startTime` and set it to `block.timestamp`
 
@@ -498,7 +498,7 @@ sequenceDiagram
 Here are more granular instructions on setting up the EventAssertion struct:
 - asserter should be `msg.sender`
 - reward should be `msg.value`
-- bond should be `FIXED_BOND`
+- bond should be the reward x 2 (You will know why as you understand the economics and game theory)
 - startTime = `startTime`
 - endTime = `endTime`
 - description = `description`
@@ -512,7 +512,7 @@ Here are more granular instructions on setting up the EventAssertion struct:
     function assertEvent(string memory description, uint256 startTime, uint256 endTime) external payable returns (uint256) {
         uint256 assertionId = nextAssertionId;
         nextAssertionId++;
-        if (msg.value < MINIMUM_REWARD) revert NotEnoughValue();
+        if (msg.value == 0) revert NotEnoughValue();
 
         // Set default times if not provided
         if (startTime == 0) {
@@ -532,7 +532,7 @@ Here are more granular instructions on setting up the EventAssertion struct:
             proposedOutcome: false,
             resolvedOutcome: false,
             reward: msg.value,
-            bond: FIXED_BOND,
+            bond: msg.value * 2,
             startTime: startTime,
             endTime: endTime,
             claimed: false,
@@ -716,7 +716,7 @@ Very similar to the last function except this one allows the winner of the dispu
 
 * 📝 Set the `claimed` property on the assertion to `true`
 
-* 💸 Transfer fixed decider fee first (`DECIDER_FEE`), then send remaining reward to the winner - this should be *both* of the bonds (proposer and disputer) plus the reward
+* 💸 Transfer the loser's bond to the decider, then send the reward and bond refund to the winner
 
 * 📣 Emit `RewardClaimed`
 
@@ -725,8 +725,8 @@ Very similar to the last function except this one allows the winner of the dispu
 
 - Validate assertion state: proposed, disputed, winner set, not yet claimed
 - Mark as claimed *before* paying to avoid re-entrancy
-- Pay `DECIDER_FEE` to `decider`
-- Winner receives `(reward + proposerBond + disputerBond - DECIDER_FEE)`
+- Pay the losers bond to the `decider`
+- Winner receives `(reward + bond)`
 - Use safe ETH sending pattern with revert on failure (`TransferFailed`)
 
 <details markdown="1">
@@ -743,10 +743,10 @@ Very similar to the last function except this one allows the winner of the dispu
 
         assertion.claimed = true;
 
-        (bool deciderSuccess, ) = payable(decider).call{value: DECIDER_FEE}("");
+        (bool deciderSuccess, ) = payable(decider).call{value: assertion.bond}("");
         if (!deciderSuccess) revert TransferFailed();
         
-        uint256 totalReward = (assertion.reward + assertion.bond + assertion.bond) - DECIDER_FEE;
+        uint256 totalReward = assertion.reward + assertion.bond;
 
         (bool winnerSuccess, ) = payable(assertion.winner).call{value: totalReward}("");
         if (!winnerSuccess) revert TransferFailed();
@@ -1115,4 +1115,4 @@ Oracles are fundamental infrastructure for the decentralized web. They enable sm
 
 🚀 As you continue your blockchain development journey, you'll encounter many variations and combinations of these patterns. Understanding the fundamental trade-offs will help you choose the right oracle design for your specific use case.
 
-🧠 Remember: the best oracle is the one that provides the right balance of security, speed, and cost for your application's needs!
+🧠 Remember: the best oracle is the one that provides the right balance of security, speed, flexibility and cost for your application's needs!
