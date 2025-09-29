@@ -44,7 +44,7 @@ export const WhitelistRow = ({ address, isActive }: WhitelistRowProps) => {
     data === undefined || isNotReported ? "Not reported" : Number(parseFloat(formatEther(data?.[0] ?? 0n)).toFixed(2));
 
   return (
-    <tr className={`table-fixed ${isActive ? "" : "opacity-40"}`}>
+    <tr className={`table-fixed`}>
       <td>
         <Address address={address} size="sm" format="short" onlyEnsOrAddress={true} />
       </td>
@@ -53,7 +53,11 @@ export const WhitelistRow = ({ address, isActive }: WhitelistRowProps) => {
         address={address}
         highlightColor={getHighlightColorForPrice(data?.[0], medianPrice)}
       />
-      <HighlightedCell value={isActive ? "active" : "stale"} highlightColor={""}>
+      <HighlightedCell
+        value={isActive ? "active" : "stale"}
+        highlightColor={""}
+        className={isActive ? "text-success" : "text-error"}
+      >
         {isActive ? "Active" : "Stale"}
       </HighlightedCell>
     </tr>
