@@ -21,7 +21,7 @@ contract OptimisticOracle {
 
     error AssertionNotFound();
     error AssertionProposed();
-    error NotEnoughValue();
+    error InvalidValue();
     error InvalidTime();
     error ProposalDisputed();
     error NotProposedAssertion();
@@ -53,7 +53,7 @@ contract OptimisticOracle {
     }
 
     uint256 public constant MINIMUM_ASSERTION_WINDOW = 3 minutes;
-    uint256 public constant MINIMUM_DISPUTE_WINDOW = 3 minutes;
+    uint256 public constant DISPUTE_WINDOW = 3 minutes;
     address public decider;
     address public owner;
     uint256 public nextAssertionId = 1;
@@ -144,7 +144,7 @@ contract OptimisticOracle {
     ) external payable returns (uint256) {
         uint256 assertionId = nextAssertionId;
         nextAssertionId++;
-        if (msg.value == 0) revert NotEnoughValue();
+        if (msg.value == 0) revert InvalidValue();
 
         // Set default times if not provided
         if (startTime == 0) {
@@ -190,11 +190,11 @@ contract OptimisticOracle {
         if (assertion.proposer != address(0)) revert AssertionProposed();
         if (block.timestamp < assertion.startTime) revert InvalidTime();
         if (block.timestamp > assertion.endTime) revert InvalidTime();
-        if (msg.value != assertion.bond) revert NotEnoughValue();
+        if (msg.value != assertion.bond) revert InvalidValue();
 
         assertion.proposer = msg.sender;
         assertion.proposedOutcome = outcome;
-        assertion.endTime = block.timestamp + MINIMUM_DISPUTE_WINDOW;
+        assertion.endTime = block.timestamp + DISPUTE_WINDOW;
 
         emit OutcomeProposed(assertionId, msg.sender, outcome);
     }
@@ -211,7 +211,7 @@ contract OptimisticOracle {
         if (assertion.proposer == address(0)) revert NotProposedAssertion();
         if (assertion.disputer != address(0)) revert ProposalDisputed();
         if (block.timestamp > assertion.endTime) revert InvalidTime();
-        if (msg.value != assertion.bond) revert NotEnoughValue();
+        if (msg.value != assertion.bond) revert InvalidValue();
 
         assertion.disputer = msg.sender;
 

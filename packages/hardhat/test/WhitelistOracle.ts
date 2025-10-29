@@ -4,6 +4,11 @@ import type { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signer
 import type { WhitelistOracle, SimpleOracle } from "../typechain-types";
 
 describe("Checkpoint1", function () {
+  before(async () => {
+    await ethers.provider.send("evm_setAutomine", [true]);
+    await ethers.provider.send("evm_setIntervalMining", [0]);
+  });
+
   let whitelistOracle: WhitelistOracle;
   let owner: HardhatEthersSigner,
     addr1: HardhatEthersSigner,
@@ -208,7 +213,7 @@ describe("Checkpoint1", function () {
     await oracle2.setPrice(2000n);
 
     // Verify median works initially
-    let medianPrice = await whitelistOracle.getPrice();
+    const medianPrice = await whitelistOracle.getPrice();
     expect(medianPrice).to.equal(1500n);
 
     // Make all prices stale

@@ -102,7 +102,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 47,
+      deployedOnBlock: 23,
     },
     OptimisticOracle: {
       address: "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
@@ -150,12 +150,12 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "NotDisputedAssertion",
+          name: "InvalidValue",
           type: "error",
         },
         {
           inputs: [],
-          name: "NotEnoughValue",
+          name: "NotDisputedAssertion",
           type: "error",
         },
         {
@@ -354,7 +354,7 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "MINIMUM_ASSERTION_WINDOW",
+          name: "DISPUTE_WINDOW",
           outputs: [
             {
               internalType: "uint256",
@@ -367,7 +367,7 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "MINIMUM_DISPUTE_WINDOW",
+          name: "MINIMUM_ASSERTION_WINDOW",
           outputs: [
             {
               internalType: "uint256",
@@ -742,7 +742,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 45,
+      deployedOnBlock: 19,
     },
     StakingOracle: {
       address: "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
@@ -754,17 +754,27 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "EmptyArray",
+          name: "AlreadyReportedInCurrentBucket",
           type: "error",
         },
         {
           inputs: [],
-          name: "FailedToSendReward",
+          name: "FailedToSend",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "IndexOutOfBounds",
           type: "error",
         },
         {
           inputs: [],
           name: "InsufficientStake",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "InvalidPrice",
           type: "error",
         },
         {
@@ -784,13 +794,57 @@ const deployedContracts = {
         },
         {
           inputs: [],
+          name: "NodeAlreadySlashed",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "NodeDidNotReport",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "NodeNotAtGivenIndex",
+          type: "error",
+        },
+        {
+          inputs: [],
           name: "NodeNotRegistered",
           type: "error",
         },
         {
           inputs: [],
-          name: "NotEnoughStake",
+          name: "NotDeviated",
           type: "error",
+        },
+        {
+          inputs: [],
+          name: "OnlyPastBucketsAllowed",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "WaitingPeriodNotOver",
+          type: "error",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "node",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "NodeExited",
+          type: "event",
         },
         {
           anonymous: false,
@@ -851,8 +905,27 @@ const deployedContracts = {
         },
         {
           anonymous: false,
-          inputs: [],
-          name: "NodesValidated",
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "node",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "price",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "bucketNumber",
+              type: "uint256",
+            },
+          ],
+          name: "PriceReported",
           type: "event",
         },
         {
@@ -867,16 +940,81 @@ const deployedContracts = {
             {
               indexed: false,
               internalType: "uint256",
-              name: "price",
+              name: "amount",
               type: "uint256",
             },
           ],
-          name: "PriceReported",
+          name: "StakeAdded",
           type: "event",
         },
         {
           inputs: [],
+          name: "BUCKET_WINDOW",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "INACTIVITY_PENALTY",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "MAX_DEVIATION_BPS",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
           name: "MINIMUM_STAKE",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "MISREPORT_PENALTY",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "REWARD_PER_REPORT",
           outputs: [
             {
               internalType: "uint256",
@@ -902,7 +1040,7 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "STALE_DATA_WINDOW",
+          name: "WAITING_PERIOD",
           outputs: [
             {
               internalType: "uint256",
@@ -915,9 +1053,103 @@ const deployedContracts = {
         },
         {
           inputs: [],
+          name: "addStake",
+          outputs: [],
+          stateMutability: "payable",
+          type: "function",
+        },
+        {
+          inputs: [],
           name: "claimReward",
           outputs: [],
           stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "index",
+              type: "uint256",
+            },
+          ],
+          name: "exitNode",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "nodeAddress",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "bucketNumber",
+              type: "uint256",
+            },
+          ],
+          name: "getAddressDataAtBucket",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getCurrentBucketNumber",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "nodeAddress",
+              type: "address",
+            },
+          ],
+          name: "getEffectiveStake",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getLatestPrice",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
           type: "function",
         },
         {
@@ -934,8 +1166,33 @@ const deployedContracts = {
           type: "function",
         },
         {
-          inputs: [],
-          name: "getPrice",
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "bucketNumber",
+              type: "uint256",
+            },
+          ],
+          name: "getOutlierNodes",
+          outputs: [
+            {
+              internalType: "address[]",
+              name: "",
+              type: "address[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "bucketNumber",
+              type: "uint256",
+            },
+          ],
+          name: "getPastPrice",
           outputs: [
             {
               internalType: "uint256",
@@ -976,34 +1233,34 @@ const deployedContracts = {
           name: "nodes",
           outputs: [
             {
-              internalType: "address",
-              name: "nodeAddress",
-              type: "address",
-            },
-            {
               internalType: "uint256",
               name: "stakedAmount",
               type: "uint256",
             },
             {
               internalType: "uint256",
-              name: "lastReportedPrice",
+              name: "lastReportedBucket",
               type: "uint256",
             },
             {
               internalType: "uint256",
-              name: "lastReportedTimestamp",
+              name: "reportCount",
               type: "uint256",
             },
             {
               internalType: "uint256",
-              name: "lastClaimedTimestamp",
+              name: "claimedReportCount",
               type: "uint256",
             },
             {
               internalType: "uint256",
-              name: "lastSlashedTimestamp",
+              name: "firstBucket",
               type: "uint256",
+            },
+            {
+              internalType: "bool",
+              name: "active",
+              type: "bool",
             },
           ],
           stateMutability: "view",
@@ -1064,37 +1321,53 @@ const deployedContracts = {
         {
           inputs: [
             {
-              internalType: "address[]",
-              name: "nodesToSeparate",
-              type: "address[]",
+              internalType: "address",
+              name: "nodeToSlash",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "bucketNumber",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "index",
+              type: "uint256",
             },
           ],
-          name: "separateStaleNodes",
+          name: "slashNode",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "timeBuckets",
           outputs: [
             {
-              internalType: "address[]",
-              name: "fresh",
-              type: "address[]",
+              internalType: "uint256",
+              name: "countReports",
+              type: "uint256",
             },
             {
-              internalType: "address[]",
-              name: "stale",
-              type: "address[]",
+              internalType: "uint256",
+              name: "sumPrices",
+              type: "uint256",
             },
           ],
           stateMutability: "view",
           type: "function",
         },
-        {
-          inputs: [],
-          name: "slashNodes",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 33,
+      deployedOnBlock: 18,
     },
     WhitelistOracle: {
       address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
@@ -1255,7 +1528,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 1,
+      deployedOnBlock: 15,
     },
   },
 } as const;

@@ -932,7 +932,7 @@ sequenceDiagram
 
 * 📣 This function allows users to assert that an event will have a true/false outcome
 
-* 💸 It should require that the reward (`msg.value`) is greater than 0 . If it is not then revert with `NotEnoughValue`
+* 💸 It should require that the reward (`msg.value`) is greater than 0 . If it is not then revert with `InvalidValue`
 
 * ⏱️ It should accept 0 for `startTime` and set it to `block.timestamp`
 
@@ -969,7 +969,7 @@ Here are more granular instructions on setting up the EventAssertion struct:
     function assertEvent(string memory description, uint256 startTime, uint256 endTime) external payable returns (uint256) {
         uint256 assertionId = nextAssertionId;
         nextAssertionId++;
-        if (msg.value == 0) revert NotEnoughValue();
+        if (msg.value == 0) revert InvalidValue();
 
         // Set default times if not provided
         if (startTime == 0) {
@@ -1015,7 +1015,7 @@ Here are more granular instructions on setting up the EventAssertion struct:
 
 * ⏱️ It should validate the timing constraints - it has to be after `startTime` but before the `endTime` or else revert with `InvalidTime`
 
-* 💸 It should enforce the correct bond amount is provided or revert with `NotEnoughValue`
+* 💸 It should enforce the correct bond amount is provided or revert with `InvalidValue`
 
 * ✍️ It should update the assertion with the proposal
 
@@ -1044,7 +1044,7 @@ You want to set these properties on the assertion:
         if (assertion.proposer != address(0)) revert AssertionProposed();
         if (block.timestamp < assertion.startTime) revert InvalidTime();
         if (block.timestamp > assertion.endTime) revert InvalidTime();
-        if (msg.value != assertion.bond) revert NotEnoughValue();
+        if (msg.value != assertion.bond) revert InvalidValue();
 
         assertion.proposer = msg.sender;
         assertion.proposedOutcome = outcome;
@@ -1088,7 +1088,7 @@ The bond amount should be the bond set on the assertion. The same amount that th
         if (assertion.proposer == address(0)) revert NotProposedAssertion();
         if (assertion.disputer != address(0)) revert ProposalDisputed();
         if (block.timestamp > assertion.endTime) revert InvalidTime();
-        if (msg.value != assertion.bond) revert NotEnoughValue();
+        if (msg.value != assertion.bond) revert InvalidValue();
 
         assertion.disputer = msg.sender;
 
