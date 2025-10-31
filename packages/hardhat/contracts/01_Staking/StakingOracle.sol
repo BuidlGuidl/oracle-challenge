@@ -104,9 +104,9 @@ contract StakingOracle {
      * @notice Registers a new oracle node with initial ETH stake and price
      * @dev Creates a new OracleNode struct and adds the sender to the nodeAddresses array.
      *      Requires minimum stake amount and prevents duplicate registrations.
-     * @param initialPrice The initial price value this oracle node will report
+     * @param price The initial price value this oracle node will report
      */
-    function registerNode(uint256 initialPrice) public payable {
+    function registerNode(uint256 price) public payable {
         if (msg.value < MINIMUM_STAKE) revert InsufficientStake();
         if (nodes[msg.sender].active) revert NodeAlreadyRegistered();
         nodes[msg.sender] = OracleNode({
@@ -118,7 +118,7 @@ contract StakingOracle {
             active: true
         });
         nodeAddresses.push(msg.sender);
-        reportPrice(initialPrice);
+        reportPrice(price);
         emit NodeRegistered(msg.sender, msg.value);
     }
 
@@ -191,19 +191,24 @@ contract StakingOracle {
         uint256 actualPenalty = MISREPORT_PENALTY > node.stakedAmount ? node.stakedAmount : MISREPORT_PENALTY;
         node.stakedAmount -= actualPenalty;
 
-        uint256 reward = (actualPenalty * SLASHER_REWARD_PERCENTAGE) / 100;
-
-        (bool sent, ) = msg.sender.call{ value: reward }("");
-        if (!sent) revert FailedToSend();
-
         if (node.stakedAmount == 0) {
             _removeNode(nodeToSlash, index);
             emit NodeExited(nodeToSlash, 0);
         }
 
+        uint256 reward = (actualPenalty * SLASHER_REWARD_PERCENTAGE) / 100;
+
+        (bool sent, ) = msg.sender.call{ value: reward }("");
+        if (!sent) revert FailedToSend();
+
         emit NodeSlashed(nodeToSlash, actualPenalty);
     }
 
+    /**
+     * @notice Allows a registered node to exit the system and withdraw their stake
+     * @dev Removes the node from the system and sends the stake to the node
+     * @param index The index of the node to remove in nodeAddresses
+     */
     function exitNode(uint256 index) public onlyNode {
         OracleNode storage node = nodes[msg.sender];
         if (node.lastReportedBucket + WAITING_PERIOD > getCurrentBucketNumber()) revert WaitingPeriodNotOver();
@@ -211,7 +216,6 @@ contract StakingOracle {
         uint256 stake = getEffectiveStake(msg.sender);
         _removeNode(msg.sender, index);
         // Withdraw the stake
-        delete nodes[msg.sender];
         (bool sent, ) = msg.sender.call{ value: stake }("");
         if (!sent) revert FailedToSend();
     
@@ -221,6 +225,15 @@ contract StakingOracle {
     ////////////////////////
     /// View Functions /////
     ////////////////////////
+
+    /**
+     * @notice Returns the current bucket number
+     * @dev Returns the current bucket number based on the block number
+     * @return The current bucket number
+     */
+    function getCurrentBucketNumber() public view returns (uint256) {
+        return (block.number / BUCKET_WINDOW) + 1;
+    }
 
     /**
      * @notice Returns the list of registered oracle node addresses
@@ -252,19 +265,16 @@ contract StakingOracle {
         if (bucket.countReports == 0) revert NoValidPricesAvailable();
         return bucket.sumPrices / bucket.countReports;
     }
-
+    
+    /**
+     * @notice Returns the price and slashed status of a node at a given bucket
+     * @param nodeAddress The address of the node to get the data for
+     * @param bucketNumber The bucket number to get the data from
+     * @return The price and slashed status of the node at the bucket
+     */
     function getAddressDataAtBucket(address nodeAddress, uint256 bucketNumber) public view returns (uint256, bool) {
         TimeBucket storage bucket = timeBuckets[bucketNumber];
         return (bucket.prices[nodeAddress], bucket.slashedOffenses[nodeAddress]);
-    }
-
-    /**
-     * @notice Returns the current bucket number
-     * @dev Returns the current bucket number based on the block number
-     * @return The current bucket number
-     */
-    function getCurrentBucketNumber() public view returns (uint256) {
-        return (block.number / BUCKET_WINDOW) + 1;
     }
 
     /**

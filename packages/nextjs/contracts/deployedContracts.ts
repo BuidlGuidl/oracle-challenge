@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     Decider: {
-      address: "0x9A676e781A523b5d0C0e43731313A708CB607508",
+      address: "0x5eb3Bc0a489C5A8288765d2336659EbCA68FCd00",
       abi: [
         {
           inputs: [
@@ -102,10 +102,10 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 23,
+      deployedOnBlock: 51489,
     },
     OptimisticOracle: {
-      address: "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+      address: "0x9d4454B023096f34B160D6B654540c56A1F81688",
       abi: [
         {
           inputs: [
@@ -742,10 +742,10 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 19,
+      deployedOnBlock: 51485,
     },
     StakingOracle: {
-      address: "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
+      address: "0x8f86403A4DE0BB5791fa46B8e795C547942fE4Cf",
       abi: [
         {
           inputs: [],
@@ -1296,7 +1296,7 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "uint256",
-              name: "initialPrice",
+              name: "price",
               type: "uint256",
             },
           ],
@@ -1367,10 +1367,10 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 18,
+      deployedOnBlock: 51484,
     },
     WhitelistOracle: {
-      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      address: "0x84eA74d481Ee0A5332c457a4d796187F6Ba67fEB",
       abi: [
         {
           inputs: [],
@@ -1528,7 +1528,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 15,
+      deployedOnBlock: 51481,
     },
   },
 } as const;

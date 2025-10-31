@@ -42,8 +42,14 @@ const normalizeNodeInfo = (raw: any) => {
 // and updated from on-chain contract prices thereafter.
 let currentPrice: bigint | null = null;
 
-// Feature flag: enable automatic slashing when the --auto-slash flag is passed
-const AUTO_SLASH: boolean = process.argv.includes("--auto-slash") || process.env.AUTO_SLASH === "1";
+const stringToBool = (value: string | undefined | null): boolean => {
+  if (!value) return false;
+  const normalized = value.toLowerCase();
+  return normalized === "1" || normalized === "true" || normalized === "yes" || normalized === "on";
+};
+
+// Feature flag: enable automatic slashing when the AUTO_SLASH environment variable is truthy
+const AUTO_SLASH: boolean = stringToBool(process.env.AUTO_SLASH);
 
 const getStakingOracleDeployment = async (runtime: HardhatRuntimeEnvironment) => {
   const deployment = await runtime.deployments.get("StakingOracle");
